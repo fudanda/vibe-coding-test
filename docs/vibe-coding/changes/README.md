@@ -35,15 +35,22 @@ docs/vibe-coding/changes/2026/06/2026-06-23-1612-lisi-fix-drizzle-env.md
 
 `Token 消耗` 用于记录本次 AI 协作成本，放在 change fragment 头部元数据中，位于 `AI 协助` 后面。
 
-默认做法是按“一个有意义任务 = 一个 Codex goal = 一个 change fragment”统计。
+当前默认规则：不为任务自动创建 Codex goal，也不强制统计 token 消耗。
 
-有意义任务开始时，Codex 应先创建任务级 goal。以下情况可以不创建 goal，但必须在 `Token 消耗` 中写明原因：
+默认格式：
 
-- 用户明确要求不要创建 goal。
-- 当前 Codex 环境没有可用的 `create_goal` / `get_goal`。
-- 本次只是无需记录 change fragment 的普通问答、typo 或临时探索。
+```text
+Token 消耗：未记录（当前规则不使用 Codex goal 统计）
+```
 
-任务开始时创建 goal：
+只有用户明确要求以下事项时，才使用 Codex goal：
+
+- 记录 token。
+- 创建 goal。
+- 设置 `token_budget`。
+- 统计某个任务的 AI 协作成本。
+
+需要统计 token 时，任务开始时创建 goal：
 
 ```json
 {
@@ -62,32 +69,20 @@ docs/vibe-coding/changes/2026/06/2026-06-23-1612-lisi-fix-drizzle-env.md
 
 任务结束前调用 `get_goal()`，把返回里的 `goal.tokensUsed`、`goal.timeUsedSeconds`、`goal.status` 写入 change fragment。
 
-推荐格式：
-
-```text
-Token 消耗：goal.tokensUsed=15500，timeUsedSeconds=420，status=active
-```
-
-如果任务结束时已经通过目标状态更新完成：
+有 goal 时的推荐格式：
 
 ```text
 Token 消耗：goal.tokensUsed=15500，timeUsedSeconds=420，status=complete
 ```
 
-如果本次任务没有创建 goal：
-
-```text
-Token 消耗：未记录（本次任务未创建 Codex goal）
-```
-
 规则：
 
-- `goal.tokensUsed` 记录的是当前 goal 生命周期内的 token 消耗，不是天然的整条会话总消耗。
-- change fragment 默认记录当前任务 goal 的消耗，不强求全会话统计。
-- 创建 change fragment 前，应先尝试读取 `get_goal()`，避免因为忘记创建或读取 goal 导致 token 统计缺失。
-- 不能获得精确值时，写 `未记录（原因）`。
+- 不要为了填写字段而自动创建 Codex goal。
 - 不要为了补齐字段而编造估算值。
-- 如果一个 PR 使用多个 AI 工具，可以写成 `Codex goal.tokensUsed=...；Claude：...`。
+- 未明确要求统计 token 时，统一写 `未记录（当前规则不使用 Codex goal 统计）`。
+- 如果明确创建了 goal，`goal.tokensUsed` 记录的是当前 goal 生命周期内的 token 消耗，不是天然的整条会话总消耗。
+- 如果当前环境无法获取精确值，写 `未记录（原因）`。
+- 如果一个 PR 使用多个 AI 工具，可以按工具分别记录，例如 `Codex：未记录；Claude：...`。
 
 ## 作者规则
 

@@ -59,7 +59,7 @@
 项目代码中主要使用 `#/*`，例如：
 
 ```ts
-import { makeData } from '#/data/demo-table-data'
+import { demoPeopleSeed } from '#/data/demo-table-data'
 ```
 
 ## 环境变量

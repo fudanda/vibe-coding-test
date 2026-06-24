@@ -13,7 +13,7 @@
 - Drizzle ORM + better-sqlite3
 - Biome
 
-项目当前更像“功能样板 + 技术验证场”，包含基础页面、全局壳层、主题切换、TanStack 系列 demo、SQLite Todo demo 和工程配置。
+项目当前更像“功能样板 + 技术验证场”，包含基础页面、全局壳层、主题切换、TanStack 系列 demo、SQLite Todo demo、SQLite 表格 demo 和工程配置。
 
 ## 模块清单
 
@@ -25,8 +25,8 @@
 | 样式与主题 | [styling-theme.md](./styling-theme.md) | Tailwind、CSS 变量、深浅色主题、共享视觉类 |
 | TanStack Query | [tanstack-query.md](./tanstack-query.md) | QueryClient、SSR Query 集成、Query Devtools、查询 demo |
 | TanStack Store | [demo-store.md](./demo-store.md) | 全局 store、派生状态、Store Devtools、表单联动 |
-| TanStack Table | [demo-table.md](./demo-table.md) | faker 数据、表格列、模糊过滤、排序、分页 |
-| Drizzle 数据库 | [database-drizzle.md](./database-drizzle.md) | SQLite 连接、schema、server function、Todo demo |
+| TanStack Table | [demo-table.md](./demo-table.md) | SQLite 表格数据、server function、模糊过滤、排序、分页 |
+| Drizzle 数据库 | [database-drizzle.md](./database-drizzle.md) | SQLite 连接、schema、server function、Todo 和表格 demo |
 | 环境与工程化 | [environment-tooling.md](./environment-tooling.md) | Vite、TypeScript、Biome、shadcn、环境变量、脚本 |
 
 ## 模块关系
@@ -41,6 +41,7 @@ flowchart TD
   Pages --> Store["TanStack Store Demo"]
   Pages --> Table["TanStack Table Demo"]
   Pages --> Drizzle["Drizzle Todo Demo"]
+  Table --> DB["SQLite + Drizzle schema"]
   Drizzle --> DB["SQLite + Drizzle schema"]
   Pages --> Styling["styles.css + Tailwind"]
 ```

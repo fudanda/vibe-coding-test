@@ -42,7 +42,10 @@
 
 - `作者` 必须是本次变更负责人，不得默认填写 Codex、Claude、Cursor 等 AI 工具。
 - AI 工具参与情况写入 `AI 协助` 或 PR 的“人工智能参与说明”。
-- 有意义任务如果创建了 Codex goal，任务结束前应记录 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`；无法获取时写 `未记录（原因）`，不得估算。
+- 默认不创建 Codex goal，也不强制统计 token 消耗。
+- 只有用户明确要求“记录 token”“创建 goal”或“设置 token_budget”时，才创建或读取 Codex goal。
+- 未明确要求统计 token 时，`Token 消耗` 填写 `未记录（当前规则不使用 Codex goal 统计）`；如果本次任务明确创建了 Codex goal，任务结束前应记录 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`。
+- 无法获取精确 token 统计时写 `未记录（原因）`，不得估算。
 - Review 字段必须写清来源：`未评审`、`AI：Codex/code-reviewer`、`人工：<reviewer>` 或 `人工+AI：<reviewer>，Codex/code-reviewer`。
 - 独立 Review 线程必须记录 diff 快照路径、线程 ID 和是否过期。
 - 高风险变更必须有人类 Review，不能只依赖 AI Review。

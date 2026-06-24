@@ -35,8 +35,8 @@ docs/vibe-coding/changes/YYYY/MM/YYYY-MM-DD-HHMM-<author>-<topic>.md
 
 - 每个 PR 如果需要记录变更，只新增自己的 change fragment 文件。
 - change fragment 的 `作者` 必须是变更负责人；AI 工具写入 `AI 协助`。
-- 有意义任务开始时应先创建任务级 Codex goal。
-- change fragment 必须填写 `Token 消耗`；任务结束前调用 `get_goal()`，记录当前任务 Codex goal 的 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`，未创建 goal 时写 `未记录（原因）`。
+- 默认不创建 Codex goal，也不强制统计 token 消耗；只有用户明确要求时才创建或读取 goal。
+- change fragment 必须填写 `Token 消耗`；默认写 `未记录（当前规则不使用 Codex goal 统计）`。如果本次任务明确创建了 Codex goal，则记录 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`。
 - change fragment 必须填写 `Review`；使用 `code-reviewer` 时写 `AI：Codex/code-reviewer`，高风险变更必须有人类 Review。
 - 大 diff 或耗时 Review 建议使用独立 Review 线程，并记录 diff 快照路径、线程 ID 和是否过期。
 - 如果无法从明确指定、`VIBE_AUTHOR` 或 git config 识别作者，Codex 必须先询问开发者。

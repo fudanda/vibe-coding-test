@@ -2,31 +2,49 @@
 
 ## 模块目标
 
-TanStack Table 模块演示客户端大数据表格、模糊搜索、列过滤、排序、分页和数据刷新。
+TanStack Table 模块演示从真实 SQLite 数据库读取表格数据，并在客户端完成模糊搜索、列过滤、排序和分页。页面同时提供新增记录和重置样例数据的 server function 接口。
 
 ## 关键文件
 
 - `src/routes/demo/table.tsx`
 - `src/data/demo-table-data.ts`
+- `src/db/demo-people.ts`
+- `src/db/schema.ts`
 
 ## 数据模型
 
-`src/data/demo-table-data.ts` 定义 `Person`：
+`src/data/demo-table-data.ts` 定义表格行类型和种子数据：
 
 ```ts
-export type Person = {
+export type Person = DemoPersonSeed & {
   id: number
-  firstName: string
-  lastName: string
-  age: number
-  visits: number
-  progress: number
-  status: 'relationship' | 'complicated' | 'single'
-  subRows?: Person[]
 }
 ```
 
-`makeData(...lens)` 使用 `@faker-js/faker` 生成测试数据。当前页面初始生成 5000 行，点击 Refresh Data 会生成 50000 行用于压力测试。
+`src/db/schema.ts` 定义 `demo_people` 表：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | integer primary key | 自增主键 |
+| `firstName` | text not null | 名 |
+| `lastName` | text not null | 姓 |
+| `age` | integer not null | 年龄 |
+| `visits` | integer not null | 访问次数 |
+| `progress` | integer not null | 进度百分比 |
+| `status` | text not null | `relationship`、`complicated` 或 `single` |
+| `createdAt` | integer timestamp | 默认 `unixepoch()` |
+
+`src/db/demo-people.ts` 在第一次访问表格接口时执行 `CREATE TABLE IF NOT EXISTS demo_people`，并在表为空时写入固定样例数据。这样本地 `dev.db` 没有迁移记录时，表格 demo 仍可开箱验证。
+
+## 接口能力
+
+`src/routes/demo/table.tsx` 定义三个 TanStack Start server function：
+
+- `getTablePeople`：GET，读取 `demo_people` 全量演示数据。
+- `createTablePerson`：POST，接收表单数据，规范化后插入 `demo_people`。
+- `resetTablePeople`：POST，清空并恢复固定样例数据。
+
+页面 loader 调用 `getTablePeople()`，新增或重置成功后调用 `router.invalidate()` 重新读取数据库。
 
 ## 表格能力
 
@@ -48,49 +66,53 @@ export type Person = {
 - `firstName`
 - `lastName`
 - `fullName`
+- `age`
+- `visits`
+- `progress`
+- `status`
 
 其中 `fullName` 使用 accessor function 拼接姓名，并使用 fuzzy filter/sort。
 
 ## 数据流
 
-1. 页面初始化时调用 `makeData(5_000)`。
-2. 用户输入全局搜索或列搜索。
-3. `DebouncedInput` 延迟 500ms 调用过滤更新。
-4. TanStack Table 计算过滤、排序、分页后的 row model。
-5. 页面渲染当前页 rows。
-
-当 `fullName` 列被过滤时，`useEffect` 会自动把排序切换到 `fullName`，确保模糊匹配结果按 rank 排列。
+1. 访问 `/demo/table`。
+2. 路由 loader 调用 `getTablePeople()`。
+3. `src/db/demo-people.ts` 确保 `demo_people` 表存在，并在空表时写入种子数据。
+4. 页面通过 `Route.useLoaderData()` 把数据库记录交给 TanStack Table。
+5. 用户执行搜索、列过滤、排序或分页时，由 TanStack Table 在客户端计算当前 row model。
+6. 用户新增或重置数据后，server function 写入 SQLite，并通过 `router.invalidate()` 刷新 loader 数据。
 
 ## 开发方式
 
 新增列时：
 
-1. 更新 `Person` 类型。
-2. 在 `makeData` 中生成字段。
-3. 在 `columns` 中添加 `accessorKey` 或 `accessorFn`。
-4. 选择合适的 `filterFn` 和 `sortingFn`。
-5. 检查大数据量下的交互性能。
+1. 更新 `src/data/demo-table-data.ts` 的类型和种子数据。
+2. 更新 `src/db/schema.ts` 的 `demoPeople` 表。
+3. 更新 `src/db/demo-people.ts` 的建表 SQL、select 字段和输入规范化逻辑。
+4. 在 `src/routes/demo/table.tsx` 的 `columns` 中添加 `accessorKey` 或 `accessorFn`。
+5. 运行本模块相关检查和 `npm run build`。
 
-如果接入真实后端数据，需要重新判断：
+如果演示数据变成正式业务数据，需要重新判断：
 
-- 是否仍然客户端分页。
+- 是否仍然客户端分页、过滤和排序。
 - 是否改为服务端分页、过滤和排序。
-- 是否保留 `faker` demo 数据。
-- 是否需要加载态和错误态。
+- 是否需要正式迁移文件，而不是运行时 `CREATE TABLE IF NOT EXISTS`。
+- 是否需要更严格的 Zod 校验、唯一约束和错误提示。
 
 ## 变更注意事项
 
-- 当前 fuzzy filter 使用 `any`，正式代码可以按表格数据类型进一步收紧。
-- 50000 行数据用于压力测试，移动端或低性能设备上可能明显卡顿。
+- `demo_people` 是演示表，运行时自动建表是为了降低本地验证成本；正式业务表应走 Drizzle 迁移。
+- `dev.db` 是本地 SQLite 数据文件，通常不应提交到版本库。
 - 表格容器需要处理横向滚动，否则新增列后容易溢出。
-- 当前 debug 配置打开了 `debugTable` 和 `debugHeaders`，正式环境可考虑关闭。
+- 新增 server function 时优先使用 `validator()`，不要新增已废弃的 `inputValidator()`。
 
 ## 验证清单
 
-- 访问 `/demo/table`。
+- 访问 `/demo/table`，确认页面展示“真实数据库表格示例”。
+- 确认页面包含 `demo_people` 表说明或种子数据。
 - 使用全局搜索，确认结果过滤正确。
 - 点击列头，确认排序切换正常。
 - 使用分页按钮、页码输入和 page size 下拉。
-- 点击 Refresh Data 后确认大数据量下页面仍可操作。
-- 修改表格逻辑后运行 `npm run build`。
-
+- 新增记录后确认表格刷新，并且记录写入 SQLite。
+- 点击“重置数据库样例”后确认恢复固定样例数据。
+- 修改表格或数据库逻辑后运行 `npx biome check src/routes/demo/table.tsx src/db/demo-people.ts src/db/schema.ts src/data/demo-table-data.ts` 和 `npm run build`。

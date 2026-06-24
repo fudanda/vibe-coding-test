@@ -45,7 +45,7 @@
 - [ ] 已判断是否需要更新模块文档
 - [ ] 已判断是否需要新增 change fragment
 - [ ] 已判断是否需要新增 ADR
-- [ ] 有意义任务已创建 Codex goal，或已说明未创建原因
+- [ ] 已按当前规则填写 Token 消耗；默认不创建 Codex goal，除非本次明确要求统计 token
 
 模块文档：
 
@@ -58,7 +58,7 @@ Change fragment：
 - [ ] 已新增：
 - [ ] 作者字段是本次变更负责人，不是 AI 工具
 - [ ] AI 工具已写入 `AI 协助` 或“人工智能参与说明”
-- [ ] Token 消耗已填写；已使用 Codex goal.tokensUsed，无法获取时已写明原因
+- [ ] Token 消耗已填写；未明确要求统计 token 时写 `未记录（当前规则不使用 Codex goal 统计）`
 - [ ] Review 字段已填写；如使用 AI 预审，已记录 `AI：Codex/code-reviewer`
 - [ ] 如使用独立 Review 线程，已记录快照路径、线程 ID 和是否过期
 

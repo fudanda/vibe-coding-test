@@ -2,13 +2,15 @@
 
 ## 模块目标
 
-Drizzle 数据库模块负责 SQLite 数据访问、Todo 表结构、服务端函数和数据库 demo 页面。
+Drizzle 数据库模块负责 SQLite 数据访问、演示表结构、服务端函数和数据库 demo 页面。
 
 ## 关键文件
 
 - `src/db/schema.ts`
 - `src/db/index.ts`
+- `src/db/demo-people.ts`
 - `src/routes/demo/drizzle.tsx`
+- `src/routes/demo/table.tsx`
 - `drizzle.config.ts`
 - `dev.db`
 
@@ -32,12 +34,27 @@ config({ path: ['.env.local', '.env'] })
 
 ## Schema
 
-`src/db/schema.ts` 定义 `todos` 表：
+`src/db/schema.ts` 定义 `todos` 和 `demo_people` 两张演示表。
+
+`todos` 表：
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | integer primary key | 自增主键 |
 | `title` | text not null | Todo 标题 |
+| `createdAt` | integer timestamp | 默认 `unixepoch()` |
+
+`demo_people` 表：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `id` | integer primary key | 自增主键 |
+| `firstName` | text not null | 名 |
+| `lastName` | text not null | 姓 |
+| `age` | integer not null | 年龄 |
+| `visits` | integer not null | 访问次数 |
+| `progress` | integer not null | 进度百分比 |
+| `status` | text not null | 表格演示状态 |
 | `createdAt` | integer timestamp | 默认 `unixepoch()` |
 
 ## 页面与服务端函数
@@ -48,6 +65,14 @@ config({ path: ['.env.local', '.env'] })
 - `createTodo`：POST，接收 `{ title: string }` 并插入 todos。
 
 路由 loader 调用 `getTodos()`，页面通过 `Route.useLoaderData()` 读取数据。提交表单后调用 `createTodo`，成功后执行 `router.invalidate()` 刷新 loader 数据。
+
+`src/routes/demo/table.tsx` 定义表格 demo 的 server function：
+
+- `getTablePeople`：GET，读取 `demo_people`。
+- `createTablePerson`：POST，新增人员记录。
+- `resetTablePeople`：POST，恢复固定样例数据。
+
+`src/db/demo-people.ts` 封装表格 demo 的数据库访问，并在第一次访问时自动创建 `demo_people` 表和种子数据。
 
 ## 开发方式
 
@@ -62,7 +87,7 @@ config({ path: ['.env.local', '.env'] })
 新增写操作时：
 
 - 使用 `createServerFn({ method: 'POST' })`。
-- 添加 input validator。
+- 添加 `validator()`。
 - 对空值、非法值和重复值做校验。
 - 成功后刷新路由 loader 或 Query cache。
 
@@ -70,6 +95,7 @@ config({ path: ['.env.local', '.env'] })
 
 - `dev.db` 是本地 SQLite 数据文件，通常不应提交到版本库。
 - 当前 `createTodo` 的 input validator 只是类型断言，没有做业务校验。正式功能应使用 Zod 或等价校验。
+- `demo_people` 为了演示开箱可用，在运行时自动建表和种子；正式业务表应走 Drizzle 迁移。
 - `createdAt` 使用 SQLite `unixepoch()`，读取后类型由 Drizzle timestamp mode 处理。
 - 页面文案里写了 PostgreSQL，但当前配置是 SQLite。正式文档或 UI 需要统一。
 
@@ -80,4 +106,4 @@ config({ path: ['.env.local', '.env'] })
 - 运行 `npm run db:migrate`。
 - 启动 `npm run dev`，访问 `/demo/drizzle`。
 - 新增 Todo 后确认列表刷新，且新数据在最上方。
-
+- 访问 `/demo/table`，确认 `demo_people` 自动建表、种子数据展示、新增记录和重置样例可用。

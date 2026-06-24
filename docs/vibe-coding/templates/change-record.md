@@ -13,7 +13,7 @@ docs/vibe-coding/changes/YYYY/MM/YYYY-MM-DD-HHMM-<author>-<topic>.md
 - 日期：YYYY-MM-DD
 - 作者：<name-or-git-user>
 - AI 协助：<Codex|Claude|Cursor|无>
-- Token 消耗：goal.tokensUsed=<n>，timeUsedSeconds=<n>，status=<active|complete|blocked>，或 未记录（原因）
+- Token 消耗：未记录（当前规则不使用 Codex goal 统计）
 - Review：未评审 | AI：Codex/code-reviewer | AI：Codex/code-reviewer（独立线程，快照：<path>，线程：<thread-id>） | 人工：<reviewer> | 人工+AI：<reviewer>，Codex/code-reviewer
 - PR：<link-or-id>
 - Commit：<hash-or-empty>
@@ -22,7 +22,7 @@ docs/vibe-coding/changes/YYYY/MM/YYYY-MM-DD-HHMM-<author>-<topic>.md
 
 > 作者必须是本次变更负责人。不要把 Codex 写成作者，除非这条记录明确是 Codex 作为项目维护身份创建的自动维护记录；普通开发任务应把 Codex 写入 `AI 协助`。
 
-> Token 消耗用于记录 AI 协作成本。有意义任务开始时应创建 Codex goal，任务结束时用 `get_goal()` 读取 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`；无法获得时填写 `未记录（原因）`，不要编造估算值。
+> Token 消耗用于记录 AI 协作成本。当前默认不创建 Codex goal，也不强制统计 token；只有用户明确要求“记录 token”“创建 goal”或“设置 token_budget”时，才使用 Codex goal，并记录 `goal.tokensUsed`、`goal.timeUsedSeconds` 和 `goal.status`。默认填写 `未记录（当前规则不使用 Codex goal 统计）`，不要编造估算值。
 
 > Review 字段用于区分评审来源。`code-reviewer` 是 AI 预审工具，不替代高风险变更的人类 Review。
 
