@@ -68,7 +68,7 @@
 - 无法获取精确 token 统计时写 `未记录（原因）`，不得估算。
 - Review 字段必须写清来源：`未评审`、`AI：Codex/code-reviewer`、`人工：<reviewer>` 或 `人工+AI：<reviewer>，Codex/code-reviewer`。
 - 独立 Review 线程必须记录 diff 快照路径、线程 ID 和是否过期。
-- 独立 Review 线程标题必须使用 `[VIBE-REVIEW] vibe-coding-test｜<任务短标题>`；创建成功后应调用 `set_thread_title` 重命名。
+- 独立 Review 线程标题必须使用 `【AI审查】vibe-coding-test｜<任务短标题>`；创建成功后应调用 `set_thread_title` 重命名。
 - 高风险变更必须有人类 Review，不能只依赖 AI Review。
 
 ## 验证要求
@@ -93,7 +93,8 @@
 
 - 本项目默认采用“提交与 PR 准备流程”：Codex 必须自动检查 diff、补 change fragment、运行验证、调用 `code-reviewer` 做 AI Review、生成中文 Lore 提交信息和 PR 描述草案。
 - 本项目长期授权自动触发：用户已要求“每次有意义功能修改完成后自动触发独立 Review 和提交准备”。因此功能完成时，Codex 不应等待用户再次说“创建新对话”，而应先尝试调用 Codex App `create_thread`。
-- 独立提交准备对话标题必须使用 `[VIBE-SUBMIT] vibe-coding-test｜<任务短标题>`；`create_thread` 成功后应调用 `set_thread_title` 重命名，如果无法重命名，必须把目标标题写入首条消息和最终结果。
+- 独立提交准备对话标题必须使用 `【AI提交】vibe-coding-test｜<任务短标题>`；`create_thread` 成功后应调用 `set_thread_title` 重命名，如果无法重命名，必须把目标标题写入首条消息和最终结果。
+- `【AI提交】` 只代表提交准备和受控本地 commit 门禁，不代表自动 push、创建 PR、合并或发布。
 - 如果当前 Codex App、CLI、子智能体或线程工具策略阻止自动调用，必须在最终结果中明确写出“自动触发受阻”的原因，并输出完整可粘贴的独立提交准备交接 prompt；不得静默跳过，不得只写“未评审”，也不得退回当前对话直接 commit。
 - 每次有意义的功能修改完成后，必须优先新建独立 Codex 对话执行提交与 PR 准备流程。
 - 当前开发对话只负责实现、验证、文档同步、change fragment 和交付交接包，不直接执行 `git add`、`git commit`、`git push` 或 `gh pr create`。

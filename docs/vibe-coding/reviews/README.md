@@ -30,7 +30,7 @@ docs/vibe-coding/reviews/2026/06/2026-06-24-1157-vibe-coding-test-current.diff
 
 1. 主开发线程生成固定 diff 快照。
 2. 新建独立 Codex Review 线程。
-3. 使用 `set_thread_title` 将线程标题改为 `[VIBE-REVIEW] vibe-coding-test｜<任务短标题>`。
+3. 使用 `set_thread_title` 将线程标题改为 `【AI审查】vibe-coding-test｜<任务短标题>`。
 4. Review 线程只审查快照，不把持续变化的工作区当作唯一事实来源。
 5. 主开发线程可以继续开发。
 6. Review 返回后，主开发线程整合阻塞问题、非阻塞问题、测试缺口和疑问。
@@ -41,16 +41,16 @@ docs/vibe-coding/reviews/2026/06/2026-06-24-1157-vibe-coding-test-current.diff
 独立 Review 线程统一使用：
 
 ```text
-[VIBE-REVIEW] vibe-coding-test｜<任务短标题>
+【AI审查】vibe-coding-test｜<任务短标题>
 ```
 
 独立提交准备线程统一使用：
 
 ```text
-[VIBE-SUBMIT] vibe-coding-test｜<任务短标题>
+【AI提交】vibe-coding-test｜<任务短标题>
 ```
 
-标题只用于侧边栏快速识别；快照路径、线程 ID、验证证据和风险仍然写入 change fragment 或 PR 描述。
+标题只用于侧边栏快速识别；快照路径、线程 ID、验证证据和风险仍然写入 change fragment 或 PR 描述。`【AI提交】` 只代表提交准备和受控本地 commit 门禁，不代表自动 push、创建 PR、合并或发布。
 
 ## 自动触发受阻
 
