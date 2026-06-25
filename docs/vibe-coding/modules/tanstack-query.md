@@ -53,9 +53,16 @@ export default {
 - `queryKey: ['query-demo', 'todos']`
 - `queryFn` 调用 TanStack Start server function
 - server function 通过 `src/db/todos.ts` 从 SQLite `todos` 表读取真实数据
-- 页面提供 loading、error、empty、success 和手动刷新状态
+- 页面提供 loading、error、empty、success、手动刷新、查询状态指标、数据链路和结果流展示
 
 当前 demo 访问本地 SQLite 数据库。`src/db/todos.ts` 会在首次访问时自动创建 `todos` 演示表并写入种子数据，因此不需要先手动跑 migration 才能打开查询示例。
+
+页面视觉是查询控制台风格：
+
+- 顶部展示当前 query key、server function 和 SQLite 数据源。
+- 状态卡片展示结果数量、最新记录编号和最近同步时间。
+- 结果流按数据库记录展示标题、行号和 SQLite row id。
+- 数据链路面板展示 `React Query -> Server Function -> SQLite todos` 的调用路径。
 
 ## 开发方式
 
@@ -85,6 +92,7 @@ export default {
 
 - 访问 `/demo/tanstack-query`，确认列表展示来自 SQLite `todos` 表的真实记录。
 - 点击“重新查询”，确认 React Query 能重新请求服务端函数。
+- 检查状态卡片、查询链路和结果流在桌面、移动端都不重叠。
 - 打开 TanStack Devtools，确认 Query 面板存在。
 - 修改查询接口后，验证 loading、error、empty、success 四种状态。
 - 修改 Query 集成后运行 `npm run build`。
