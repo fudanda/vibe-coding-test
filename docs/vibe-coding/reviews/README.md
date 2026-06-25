@@ -30,10 +30,27 @@ docs/vibe-coding/reviews/2026/06/2026-06-24-1157-vibe-coding-test-current.diff
 
 1. 主开发线程生成固定 diff 快照。
 2. 新建独立 Codex Review 线程。
-3. Review 线程只审查快照，不把持续变化的工作区当作唯一事实来源。
-4. 主开发线程可以继续开发。
-5. Review 返回后，主开发线程整合阻塞问题、非阻塞问题、测试缺口和疑问。
-6. 如果快照后被审文件继续变化，标记 Review 过期，并重新审查或人工确认差异。
+3. 使用 `set_thread_title` 将线程标题改为 `[VIBE-REVIEW] vibe-coding-test｜<任务短标题>`。
+4. Review 线程只审查快照，不把持续变化的工作区当作唯一事实来源。
+5. 主开发线程可以继续开发。
+6. Review 返回后，主开发线程整合阻塞问题、非阻塞问题、测试缺口和疑问。
+7. 如果快照后被审文件继续变化，标记 Review 过期，并重新审查或人工确认差异。
+
+## 线程命名
+
+独立 Review 线程统一使用：
+
+```text
+[VIBE-REVIEW] vibe-coding-test｜<任务短标题>
+```
+
+独立提交准备线程统一使用：
+
+```text
+[VIBE-SUBMIT] vibe-coding-test｜<任务短标题>
+```
+
+标题只用于侧边栏快速识别；快照路径、线程 ID、验证证据和风险仍然写入 change fragment 或 PR 描述。
 
 ## 自动触发受阻
 
