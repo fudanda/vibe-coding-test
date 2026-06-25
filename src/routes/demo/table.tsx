@@ -7,6 +7,8 @@ import type {
 	ColumnDef,
 	ColumnFiltersState,
 	FilterFn,
+	OnChangeFn,
+	PaginationState,
 	SortingFn,
 } from "@tanstack/react-table";
 import {
@@ -18,6 +20,24 @@ import {
 	sortingFns,
 	useReactTable,
 } from "@tanstack/react-table";
+import {
+	Activity,
+	ArrowDownUp,
+	ChevronFirst,
+	ChevronLast,
+	ChevronLeft,
+	ChevronRight,
+	Database,
+	ListFilter,
+	type LucideIcon,
+	RefreshCw,
+	RotateCcw,
+	Search,
+	Server,
+	Sparkles,
+	Table2,
+	UserPlus,
+} from "lucide-react";
 import React from "react";
 import type { Person } from "#/data/demo-table-data";
 import { demoPersonStatuses } from "#/data/demo-table-data";
@@ -55,6 +75,51 @@ declare module "@tanstack/react-table" {
 		itemRank: RankingInfo;
 	}
 }
+
+type TableStat = {
+	label: string;
+	value: string;
+	hint: string;
+	icon: LucideIcon;
+	tone: "lagoon" | "indigo" | "amber" | "coral";
+};
+
+const numberFormatter = new Intl.NumberFormat("zh-CN");
+
+const statusMeta: Record<
+	Person["status"],
+	{ label: string; className: string }
+> = {
+	complicated: {
+		label: "需跟进",
+		className: "table-status-complicated",
+	},
+	relationship: {
+		label: "稳定",
+		className: "table-status-relationship",
+	},
+	single: {
+		label: "新线索",
+		className: "table-status-single",
+	},
+};
+
+const filterPlaceholders: Record<string, string> = {
+	age: "年龄",
+	firstName: "名",
+	fullName: "全名",
+	id: "ID",
+	lastName: "姓",
+	progress: "进度",
+	status: "状态",
+	visits: "访问",
+};
+
+const pipelineSteps = [
+	["01", "Route Loader", "进入页面时读取 SQLite 表格数据。"],
+	["02", "Server Function", "新增、重置和重新读取都经过服务端边界。"],
+	["03", "TanStack Table", "在客户端完成搜索、过滤、排序和分页。"],
+];
 
 // Define a custom fuzzy filter function that will apply ranking info to rows (using match-sorter utils)
 const fuzzyFilter: FilterFn<Person> = (row, columnId, value, addMeta) => {
@@ -96,6 +161,16 @@ function TableDemo() {
 		[],
 	);
 	const [globalFilter, setGlobalFilter] = React.useState("");
+	const [pagination, setPagination] = React.useState<PaginationState>({
+		pageIndex: 0,
+		pageSize: 10,
+	});
+	const handleColumnFiltersChange = React.useCallback<
+		OnChangeFn<ColumnFiltersState>
+	>((updater) => {
+		setColumnFilters(updater);
+		setPagination((current) => ({ ...current, pageIndex: 0 }));
+	}, []);
 
 	const columns = React.useMemo<ColumnDef<Person>[]>(
 		() => [
@@ -103,45 +178,73 @@ function TableDemo() {
 				accessorKey: "id",
 				filterFn: "equalsString", //note: normal non-fuzzy filter column - exact match required
 				header: "ID",
+				cell: (info) => (
+					<span className="table-row-id">#{String(info.getValue())}</span>
+				),
 			},
 			{
 				accessorKey: "firstName",
 				cell: (info) => info.getValue(),
 				filterFn: "includesStringSensitive", //note: normal non-fuzzy filter column - case sensitive
-				header: "First Name",
+				header: "名",
 			},
 			{
 				accessorFn: (row) => row.lastName,
 				id: "lastName",
 				cell: (info) => info.getValue(),
-				header: () => <span>Last Name</span>,
+				header: () => <span>姓</span>,
 				filterFn: "includesString", //note: normal non-fuzzy filter column - case insensitive
 			},
 			{
 				accessorFn: (row) => `${row.firstName} ${row.lastName}`,
 				id: "fullName",
-				header: "Full Name",
-				cell: (info) => info.getValue(),
+				header: "全名",
+				cell: (info) => (
+					<span className="font-extrabold text-[var(--sea-ink)]">
+						{String(info.getValue())}
+					</span>
+				),
 				filterFn: "fuzzy", //using our custom fuzzy filter function
 				// filterFn: fuzzyFilter, //or just define with the function
 				sortingFn: fuzzySort, //sort by fuzzy rank (falls back to alphanumeric)
 			},
 			{
 				accessorKey: "age",
-				header: "Age",
+				header: "年龄",
+				cell: (info) => `${info.getValue()} 岁`,
 			},
 			{
 				accessorKey: "visits",
-				header: "Visits",
+				header: "访问",
+				cell: (info) => numberFormatter.format(Number(info.getValue())),
 			},
 			{
 				accessorKey: "progress",
-				header: "Progress",
-				cell: (info) => `${info.getValue()}%`,
+				header: "进度",
+				cell: (info) => {
+					const value = Number(info.getValue());
+					return (
+						<div className="table-progress-cell">
+							<div className="table-progress-track">
+								<span style={{ width: `${value}%` }} />
+							</div>
+							<strong>{value}%</strong>
+						</div>
+					);
+				},
 			},
 			{
 				accessorKey: "status",
-				header: "Status",
+				header: "状态",
+				cell: (info) => {
+					const value = info.getValue() as Person["status"];
+					const meta = statusMeta[value];
+					return (
+						<span className={`table-status-pill ${meta.className}`}>
+							{meta.label}
+						</span>
+					);
+				},
 			},
 		],
 		[],
@@ -156,9 +259,12 @@ function TableDemo() {
 		state: {
 			columnFilters,
 			globalFilter,
+			pagination,
 		},
-		onColumnFiltersChange: setColumnFilters,
+		onColumnFiltersChange: handleColumnFiltersChange,
 		onGlobalFilterChange: setGlobalFilter,
+		onPaginationChange: setPagination,
+		autoResetPageIndex: false,
 		globalFilterFn: "fuzzy", //apply fuzzy filter to the global filter (most common use case for fuzzy filter)
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(), //client side filtering
@@ -168,6 +274,73 @@ function TableDemo() {
 		debugHeaders: false,
 		debugColumns: false,
 	});
+
+	const filteredRows = table.getFilteredRowModel().rows.length;
+	const averageProgress =
+		data.length > 0
+			? Math.round(
+					data.reduce((total, person) => total + person.progress, 0) /
+						data.length,
+				)
+			: 0;
+	const totalVisits = data.reduce((total, person) => total + person.visits, 0);
+	const activeFilters = columnFilters.length + (globalFilter ? 1 : 0);
+	const pageCount = Math.max(table.getPageCount(), 1);
+	const canPreviousPage = pagination.pageIndex > 0;
+	const canNextPage = pagination.pageIndex < pageCount - 1;
+	const tableStats: TableStat[] = [
+		{
+			label: "数据库记录",
+			value: String(data.length).padStart(2, "0"),
+			hint: "demo_people",
+			icon: Database,
+			tone: "lagoon",
+		},
+		{
+			label: "当前结果",
+			value: String(filteredRows).padStart(2, "0"),
+			hint: `${activeFilters} 个过滤条件`,
+			icon: ListFilter,
+			tone: "indigo",
+		},
+		{
+			label: "平均进度",
+			value: `${averageProgress}%`,
+			hint: "当前数据集",
+			icon: Activity,
+			tone: "amber",
+		},
+		{
+			label: "访问合计",
+			value: numberFormatter.format(totalVisits),
+			hint: "visits",
+			icon: Sparkles,
+			tone: "coral",
+		},
+	];
+	const handleGlobalFilterChange = React.useCallback(
+		(value: string | number) => {
+			setGlobalFilter(String(value));
+			setPagination((current) => ({ ...current, pageIndex: 0 }));
+		},
+		[],
+	);
+	const goToPage = React.useCallback(
+		(pageIndex: number) => {
+			const maxPageIndex = Math.max(pageCount - 1, 0);
+			setPagination((current) => ({
+				...current,
+				pageIndex: Math.min(Math.max(pageIndex, 0), maxPageIndex),
+			}));
+		},
+		[pageCount],
+	);
+	const updatePageSize = React.useCallback((pageSize: number) => {
+		setPagination({
+			pageIndex: 0,
+			pageSize,
+		});
+	}, []);
 
 	const handleCreatePerson = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -204,7 +377,7 @@ function TableDemo() {
 
 		try {
 			await resetTablePeople();
-			table.setPageIndex(0);
+			goToPage(0);
 			await router.invalidate();
 		} catch (error) {
 			console.error("Failed to reset demo people:", error);
@@ -220,265 +393,395 @@ function TableDemo() {
 	};
 
 	return (
-		<main className="demo-page demo-page-wide">
-			<div>
-				<p className="island-kicker mb-2">TanStack Table + SQLite API</p>
-				<h1 className="demo-title mb-6">真实数据库表格示例</h1>
-				<p className="demo-muted mb-6 max-w-3xl">
-					表格数据来自 SQLite 的 <code>demo_people</code> 表，页面通过 TanStack
-					Start server function 读取、新增和重置记录。
-				</p>
-				<DebouncedInput
-					value={globalFilter ?? ""}
-					onChange={(value) => setGlobalFilter(String(value))}
-					className="demo-input"
-					placeholder="搜索所有列..."
-				/>
-			</div>
-			<div className="h-4" />
-			<form
-				onSubmit={handleCreatePerson}
-				className="demo-panel grid gap-3 md:grid-cols-6"
-			>
-				<input
-					name="firstName"
-					className="demo-input"
-					placeholder="First name"
-					required
-				/>
-				<input
-					name="lastName"
-					className="demo-input"
-					placeholder="Last name"
-					required
-				/>
-				<input
-					name="age"
-					type="number"
-					min="18"
-					max="99"
-					defaultValue="32"
-					className="demo-input"
-					aria-label="Age"
-				/>
-				<input
-					name="visits"
-					type="number"
-					min="0"
-					max="9999"
-					defaultValue="100"
-					className="demo-input"
-					aria-label="Visits"
-				/>
-				<input
-					name="progress"
-					type="number"
-					min="0"
-					max="100"
-					defaultValue="50"
-					className="demo-input"
-					aria-label="Progress"
-				/>
-				<select name="status" className="demo-select">
-					{demoPersonStatuses.map((status) => (
-						<option key={status} value={status}>
-							{status}
-						</option>
+		<main className="table-console-shell px-4 py-10 sm:px-6 lg:px-8">
+			<section className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6">
+				<header className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+					<div className="table-hero-panel">
+						<div className="mb-6 flex flex-wrap items-center gap-3">
+							<span className="table-icon-node">
+								<Table2 className="h-5 w-5" aria-hidden="true" />
+							</span>
+							<p className="island-kicker m-0">TanStack Table Workbench</p>
+							<span className="table-live-chip">
+								<span className="table-live-dot" />
+								SQLite live
+							</span>
+						</div>
+						<h1 className="display-title max-w-3xl text-4xl leading-tight sm:text-5xl">
+							真实数据库表格示例
+						</h1>
+						<p className="mt-4 max-w-3xl text-base leading-8 text-[var(--sea-ink-soft)]">
+							从 SQLite 的 <code>demo_people</code> 表读取真实数据，通过
+							TanStack Table 展示搜索、列过滤、排序、分页、新增和重置流程。
+						</p>
+						<div className="table-search-box mt-6">
+							<Search className="h-4 w-4" aria-hidden="true" />
+							<label className="sr-only" htmlFor="table-global-search">
+								搜索所有列
+							</label>
+							<DebouncedInput
+								id="table-global-search"
+								value={globalFilter ?? ""}
+								onChange={handleGlobalFilterChange}
+								placeholder="搜索姓名、状态、访问或任意列..."
+							/>
+						</div>
+					</div>
+
+					<aside
+						className="table-flow-panel"
+						aria-labelledby="table-flow-title"
+					>
+						<div className="mb-5 flex items-start justify-between gap-4">
+							<div>
+								<p className="island-kicker mb-2">Data Path</p>
+								<h2
+									id="table-flow-title"
+									className="text-xl font-extrabold text-[var(--sea-ink)]"
+								>
+									表格链路
+								</h2>
+							</div>
+							<Server
+								className="h-6 w-6 text-[var(--indigo)]"
+								aria-hidden="true"
+							/>
+						</div>
+						<div className="space-y-3">
+							{pipelineSteps.map(([step, title, desc]) => (
+								<div className="table-pipeline-step" key={step}>
+									<span>{step}</span>
+									<div>
+										<p className="font-extrabold text-[var(--sea-ink)]">
+											{title}
+										</p>
+										<p className="mt-1 text-sm leading-6 text-[var(--sea-ink-soft)]">
+											{desc}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</aside>
+				</header>
+
+				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+					{tableStats.map((stat) => (
+						<TableStatCard key={stat.label} stat={stat} />
 					))}
-				</select>
-				<div className="flex gap-2 md:col-span-6">
-					<button type="submit" className="demo-button" disabled={isCreating}>
-						{isCreating ? "新增中..." : "新增记录"}
-					</button>
-					<button
-						type="button"
-						className="demo-button demo-button-secondary"
-						onClick={handleReloadPeople}
-					>
-						重新读取接口
-					</button>
-					<button
-						type="button"
-						className="demo-button demo-button-secondary"
-						onClick={handleResetPeople}
-						disabled={isResetting}
-					>
-						{isResetting ? "重置中..." : "重置数据库样例"}
-					</button>
 				</div>
-			</form>
-			{actionError ? (
-				<p className="demo-muted mt-3 text-sm text-red-500">{actionError}</p>
-			) : null}
-			<div className="h-4" />
-			<div className="demo-table-shell">
-				<table className="demo-table text-sm">
-					<thead>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
+
+				<form onSubmit={handleCreatePerson} className="table-form-panel">
+					<div className="flex flex-col gap-2 md:col-span-6">
+						<p className="island-kicker m-0">Mutation</p>
+						<h2 className="text-2xl font-extrabold text-[var(--sea-ink)]">
+							新增一条数据库记录
+						</h2>
+					</div>
+					<input
+						name="firstName"
+						className="table-input"
+						placeholder="名"
+						required
+					/>
+					<input
+						name="lastName"
+						className="table-input"
+						placeholder="姓"
+						required
+					/>
+					<input
+						name="age"
+						type="number"
+						min="18"
+						max="99"
+						defaultValue="32"
+						className="table-input"
+						aria-label="年龄"
+					/>
+					<input
+						name="visits"
+						type="number"
+						min="0"
+						max="9999"
+						defaultValue="100"
+						className="table-input"
+						aria-label="访问次数"
+					/>
+					<input
+						name="progress"
+						type="number"
+						min="0"
+						max="100"
+						defaultValue="50"
+						className="table-input"
+						aria-label="进度百分比"
+					/>
+					<select name="status" className="table-select" aria-label="状态">
+						{demoPersonStatuses.map((status) => (
+							<option key={status} value={status}>
+								{statusMeta[status].label}
+							</option>
+						))}
+					</select>
+					<div className="flex flex-wrap gap-2 md:col-span-6">
+						<button
+							type="submit"
+							className="table-action-button"
+							disabled={isCreating}
+						>
+							<UserPlus className="h-4 w-4" aria-hidden="true" />
+							{isCreating ? "新增中" : "新增记录"}
+						</button>
+						<button
+							type="button"
+							className="table-action-button table-action-secondary"
+							onClick={handleReloadPeople}
+						>
+							<RefreshCw className="h-4 w-4" aria-hidden="true" />
+							重新读取接口
+						</button>
+						<button
+							type="button"
+							className="table-action-button table-action-secondary"
+							onClick={handleResetPeople}
+							disabled={isResetting}
+						>
+							<RotateCcw
+								className={`h-4 w-4 ${isResetting ? "animate-spin" : ""}`}
+								aria-hidden="true"
+							/>
+							{isResetting ? "重置中" : "重置样例"}
+						</button>
+					</div>
+				</form>
+
+				{actionError ? (
+					<div className="table-error-message" role="alert">
+						{actionError}
+					</div>
+				) : null}
+
+				<section
+					className="table-data-panel"
+					aria-labelledby="table-data-title"
+				>
+					<div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+						<div>
+							<p className="island-kicker mb-2">Data Grid</p>
+							<h2
+								id="table-data-title"
+								className="text-2xl font-extrabold text-[var(--sea-ink)]"
+							>
+								数据库记录
+							</h2>
+						</div>
+						<div className="table-result-chip">
+							{filteredRows} / {data.length} 条记录
+						</div>
+					</div>
+
+					<div className="table-data-shell">
+						<table className="table-data-grid">
+							<thead>
+								{table.getHeaderGroups().map((headerGroup) => (
+									<tr key={headerGroup.id}>
+										{headerGroup.headers.map((header) => {
+											return (
+												<th key={header.id} colSpan={header.colSpan}>
+													{header.isPlaceholder ? null : (
+														<>
+															<button
+																type="button"
+																className="table-sort-button"
+																onClick={header.column.getToggleSortingHandler()}
+																disabled={!header.column.getCanSort()}
+															>
+																<span>
+																	{flexRender(
+																		header.column.columnDef.header,
+																		header.getContext(),
+																	)}
+																</span>
+																{header.column.getCanSort() ? (
+																	<ArrowDownUp
+																		className="h-3.5 w-3.5"
+																		aria-hidden="true"
+																	/>
+																) : null}
+																<span className="sr-only">
+																	{header.column.getIsSorted()
+																		? `当前排序：${header.column.getIsSorted()}`
+																		: "未排序"}
+																</span>
+															</button>
+															{header.column.getCanFilter() ? (
+																<div className="mt-2">
+																	<Filter column={header.column} />
+																</div>
+															) : null}
+														</>
+													)}
+												</th>
+											);
+										})}
+									</tr>
+								))}
+							</thead>
+							<tbody>
+								{table.getRowModel().rows.map((row) => {
 									return (
-										<th
-											key={header.id}
-											colSpan={header.colSpan}
-											className="px-4 py-3 text-left"
-										>
-											{header.isPlaceholder ? null : (
-												<>
-													<div
-														{...{
-															className: header.column.getCanSort()
-																? "cursor-pointer select-none transition-colors hover:text-[var(--lagoon-deep)]"
-																: "",
-															onClick: header.column.getToggleSortingHandler(),
-														}}
-													>
+										<tr key={row.id}>
+											{row.getVisibleCells().map((cell) => {
+												return (
+													<td key={cell.id}>
 														{flexRender(
-															header.column.columnDef.header,
-															header.getContext(),
+															cell.column.columnDef.cell,
+															cell.getContext(),
 														)}
-														{{
-															asc: " 🔼",
-															desc: " 🔽",
-														}[header.column.getIsSorted() as string] ?? null}
-													</div>
-													{header.column.getCanFilter() ? (
-														<div className="mt-2">
-															<Filter column={header.column} />
-														</div>
-													) : null}
-												</>
-											)}
-										</th>
+													</td>
+												);
+											})}
+										</tr>
 									);
 								})}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map((row) => {
-							return (
-								<tr key={row.id} className="transition-colors">
-									{row.getVisibleCells().map((cell) => {
-										return (
-											<td key={cell.id} className="px-4 py-3">
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
-												)}
-											</td>
-										);
-									})}
-								</tr>
-							);
-						})}
-						{table.getRowModel().rows.length === 0 ? (
-							<tr>
-								<td
-									colSpan={columns.length}
-									className="px-4 py-8 text-center demo-muted"
-								>
-									没有匹配的数据库记录
-								</td>
-							</tr>
-						) : null}
-					</tbody>
-				</table>
-			</div>
-			<div className="h-4" />
-			<div className="demo-muted flex flex-wrap items-center gap-2">
-				<button
-					type="button"
-					className="demo-button demo-button-secondary"
-					onClick={() => table.setPageIndex(0)}
-					disabled={!table.getCanPreviousPage()}
-				>
-					{"<<"}
-				</button>
-				<button
-					type="button"
-					className="demo-button demo-button-secondary"
-					onClick={() => table.previousPage()}
-					disabled={!table.getCanPreviousPage()}
-				>
-					{"<"}
-				</button>
-				<button
-					type="button"
-					className="demo-button demo-button-secondary"
-					onClick={() => table.nextPage()}
-					disabled={!table.getCanNextPage()}
-				>
-					{">"}
-				</button>
-				<button
-					type="button"
-					className="demo-button demo-button-secondary"
-					onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-					disabled={!table.getCanNextPage()}
-				>
-					{">>"}
-				</button>
-				<span className="flex items-center gap-1">
-					<div>Page</div>
-					<strong>
-						{table.getState().pagination.pageIndex + 1} of{" "}
-						{table.getPageCount()}
-					</strong>
-				</span>
-				<span className="flex items-center gap-1">
-					| Go to page:
-					<input
-						type="number"
-						defaultValue={table.getState().pagination.pageIndex + 1}
-						onChange={(e) => {
-							const page = e.target.value ? Number(e.target.value) - 1 : 0;
-							table.setPageIndex(page);
-						}}
-						className="demo-input demo-input-fit py-1"
-					/>
-				</span>
-				<select
-					value={table.getState().pagination.pageSize}
-					onChange={(e) => {
-						table.setPageSize(Number(e.target.value));
-					}}
-					className="demo-select demo-input-fit py-1"
-				>
-					{[10, 20, 30, 40, 50].map((pageSize) => (
-						<option key={pageSize} value={pageSize}>
-							每页 {pageSize}
-						</option>
-					))}
-				</select>
-			</div>
-			<div className="demo-muted mt-4">
-				{table.getPrePaginationRowModel().rows.length} 条数据库记录
-			</div>
-			<pre className="demo-code-block mt-4 overflow-auto">
-				{JSON.stringify(
-					{
-						columnFilters: table.getState().columnFilters,
-						globalFilter: table.getState().globalFilter,
-					},
-					null,
-					2,
-				)}
-			</pre>
+								{table.getRowModel().rows.length === 0 ? (
+									<tr>
+										<td colSpan={columns.length} className="table-empty-cell">
+											没有匹配的数据库记录
+										</td>
+									</tr>
+								) : null}
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<div className="table-pagination-panel">
+					<div className="flex flex-wrap items-center gap-2">
+						<button
+							type="button"
+							className="table-icon-button"
+							onClick={() => goToPage(0)}
+							disabled={!canPreviousPage}
+							aria-label="第一页"
+						>
+							<ChevronFirst className="h-4 w-4" aria-hidden="true" />
+						</button>
+						<button
+							type="button"
+							className="table-icon-button"
+							onClick={() => goToPage(pagination.pageIndex - 1)}
+							disabled={!canPreviousPage}
+							aria-label="上一页"
+						>
+							<ChevronLeft className="h-4 w-4" aria-hidden="true" />
+						</button>
+						<button
+							type="button"
+							className="table-icon-button"
+							onClick={() => goToPage(pagination.pageIndex + 1)}
+							disabled={!canNextPage}
+							aria-label="下一页"
+						>
+							<ChevronRight className="h-4 w-4" aria-hidden="true" />
+						</button>
+						<button
+							type="button"
+							className="table-icon-button"
+							onClick={() => goToPage(pageCount - 1)}
+							disabled={!canNextPage}
+							aria-label="最后一页"
+						>
+							<ChevronLast className="h-4 w-4" aria-hidden="true" />
+						</button>
+					</div>
+					<div className="flex flex-wrap items-center gap-3 text-sm font-bold text-[var(--sea-ink-soft)]">
+						<span>
+							第 {pagination.pageIndex + 1} / {pageCount} 页
+						</span>
+						<label className="table-page-jump">
+							跳转
+							<input
+								type="number"
+								min="1"
+								max={pageCount}
+								value={pagination.pageIndex + 1}
+								onChange={(e) => {
+									const page = e.target.value ? Number(e.target.value) - 1 : 0;
+									goToPage(page);
+								}}
+							/>
+						</label>
+						<select
+							value={pagination.pageSize}
+							onChange={(e) => {
+								updatePageSize(Number(e.target.value));
+							}}
+							className="table-select table-select-fit"
+							aria-label="每页条数"
+						>
+							{[10, 20, 30, 40, 50].map((pageSize) => (
+								<option key={pageSize} value={pageSize}>
+									每页 {pageSize}
+								</option>
+							))}
+						</select>
+					</div>
+				</div>
+
+				<details className="table-debug-panel">
+					<summary>查看当前筛选状态 JSON</summary>
+					<pre>
+						{JSON.stringify(
+							{
+								columnFilters: table.getState().columnFilters,
+								globalFilter: table.getState().globalFilter,
+							},
+							null,
+							2,
+						)}
+					</pre>
+				</details>
+			</section>
 		</main>
+	);
+}
+
+function TableStatCard({ stat }: { stat: TableStat }) {
+	const Icon = stat.icon;
+
+	return (
+		<div className={`table-stat-card table-stat-${stat.tone}`}>
+			<div className="flex items-center justify-between gap-3">
+				<span className="table-stat-icon">
+					<Icon className="h-5 w-5" aria-hidden="true" />
+				</span>
+				<span className="text-xs font-extrabold text-[var(--sea-ink-soft)]">
+					{stat.hint}
+				</span>
+			</div>
+			<p className="mt-5 text-sm font-bold text-[var(--sea-ink-soft)]">
+				{stat.label}
+			</p>
+			<p className="mt-2 text-3xl font-extrabold text-[var(--sea-ink)]">
+				{stat.value}
+			</p>
+		</div>
 	);
 }
 
 function Filter({ column }: { column: Column<Person, unknown> }) {
 	const columnFilterValue = column.getFilterValue();
+	const placeholder = filterPlaceholders[column.id] ?? "过滤";
 
 	return (
 		<DebouncedInput
 			type="text"
 			value={(columnFilterValue ?? "") as string}
 			onChange={(value) => column.setFilterValue(value)}
-			placeholder={`Search...`}
-			className="demo-input py-1"
+			placeholder={placeholder}
+			className="table-filter-input"
 		/>
 	);
 }
@@ -495,18 +798,29 @@ function DebouncedInput({
 	debounce?: number;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
 	const [value, setValue] = React.useState(initialValue);
+	const onChangeRef = React.useRef(onChange);
+	const hasMountedRef = React.useRef(false);
+
+	React.useEffect(() => {
+		onChangeRef.current = onChange;
+	}, [onChange]);
 
 	React.useEffect(() => {
 		setValue(initialValue);
 	}, [initialValue]);
 
 	React.useEffect(() => {
+		if (!hasMountedRef.current) {
+			hasMountedRef.current = true;
+			return;
+		}
+
 		const timeout = setTimeout(() => {
-			onChange(value);
+			onChangeRef.current(value);
 		}, debounce);
 
 		return () => clearTimeout(timeout);
-	}, [debounce, onChange, value]);
+	}, [debounce, value]);
 
 	return (
 		<input

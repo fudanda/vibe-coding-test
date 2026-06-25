@@ -29,6 +29,7 @@
 - 首页专用类：`vibe-hero`、`vibe-step-card`、`vibe-terminal`、`vibe-review-panel`、`vibe-check-row`
 - About 页面专用类：`about-tech-scene`、`about-tech-background`、`about-signal-panel`、`about-principle-card`、`about-timeline`、`about-command-panel`
 - 查询示例专用类：`query-console-shell`、`query-hero-panel`、`query-status-panel`、`query-stat-card`、`query-results-panel`、`query-source-panel`
+- 表格示例专用类：`table-console-shell`、`table-hero-panel`、`table-flow-panel`、`table-stat-card`、`table-form-panel`、`table-data-panel`、`table-pagination-panel`、`table-debug-panel`
 
 ## 主题变量
 
@@ -61,6 +62,14 @@
 | `about-principle-card` | About 页面核心原则卡片 |
 | `about-timeline` | About 页面工作流阶段网格 |
 | `about-command-panel` | About 页面伪代码终端展示 |
+| `table-console-shell` | 表格示例页面动态网格背景容器 |
+| `table-hero-panel` | 表格示例页面主说明和全局搜索面板 |
+| `table-flow-panel` | 表格示例页面数据链路面板 |
+| `table-stat-card` | 表格示例页面数据库统计卡片 |
+| `table-form-panel` | 表格示例页面新增记录和数据操作表单 |
+| `table-data-panel` | 表格示例页面 TanStack Table 数据面板 |
+| `table-pagination-panel` | 表格示例页面分页控制面板 |
+| `table-debug-panel` | 表格示例页面筛选状态 JSON 折叠面板 |
 | `query-console-shell` | 查询示例页面动态网格背景容器 |
 | `query-hero-panel` | 查询示例页面主说明面板 |
 | `query-status-panel` | 查询示例页面刷新控制面板 |
@@ -70,9 +79,9 @@
 
 ## 当前注意事项
 
-Demo 页面中使用了 `demo-page`、`demo-panel`、`demo-input`、`demo-button` 等语义类名，但当前 `src/styles.css` 没有定义这些类。它们现在更像占位类名。
+部分 Demo 页面中仍使用 `demo-page`、`demo-panel`、`demo-input`、`demo-button` 等语义类名，但当前 `src/styles.css` 没有统一定义这些类。它们现在更像占位类名。
 
-如果后续要稳定 demo 页面视觉，建议在 `src/styles.css` 中新增一个 `@layer components`，集中定义这些 `demo-*` 类，避免每个 demo 页面重复写 Tailwind class。
+表格示例和查询示例已经分别使用 `table-*`、`query-*` 页面专用类承载视觉规则。后续如果多个 demo 页面出现相同视觉模式，再考虑在 `src/styles.css` 中新增一个 `@layer components`，集中定义共享类，避免每个 demo 页面重复写 Tailwind class。
 
 ## 开发方式
 
@@ -92,5 +101,6 @@ Demo 页面中使用了 `demo-page`、`demo-panel`、`demo-input`、`demo-button
 - 首页首屏使用远程 Unsplash 图片作为背景；如果生产环境不允许外链图片，需要替换为本地静态资源。
 - About 首屏使用本地 canvas 绘制动态网络背景，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠。
 - 查询示例页面使用 CSS 动态网格背景和 `query-*` 类，不依赖远程图片或新增依赖。
+- 表格示例页面使用 CSS 动态网格背景和 `table-*` 类，不依赖远程图片或新增依赖；桌面和移动端都应确认表格可横向滚动、表单不溢出。
 - 在移动端宽度检查 Header、表格、表单是否溢出。
 - 修改 `styles.css` 后运行 `npm run build`。

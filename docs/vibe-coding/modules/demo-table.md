@@ -2,7 +2,7 @@
 
 ## 模块目标
 
-TanStack Table 模块演示从真实 SQLite 数据库读取表格数据，并在客户端完成模糊搜索、列过滤、排序和分页。页面同时提供新增记录和重置样例数据的 server function 接口。
+ TanStack Table 模块演示从真实 SQLite 数据库读取表格数据，并在客户端完成模糊搜索、列过滤、排序和分页。页面以数据工作台形式展示数据库记录、数据链路、统计指标、新增记录、重新读取和重置样例数据等能力。
 
 ## 关键文件
 
@@ -46,6 +46,18 @@ export type Person = DemoPersonSeed & {
 
 页面 loader 调用 `getTablePeople()`，新增或重置成功后调用 `router.invalidate()` 重新读取数据库。
 
+## 页面展示
+
+`/demo/table` 当前采用表格工作台布局：
+
+- 顶部说明区展示 `demo_people` 数据来源、SQLite live 状态和全局搜索入口。
+- 数据链路面板展示 `Route Loader -> Server Function -> TanStack Table` 的执行路径。
+- 指标卡展示数据库记录数、当前过滤结果、平均进度和访问合计。
+- Mutation 表单支持新增一条数据库记录、重新读取接口和重置样例数据。
+- 表格区域支持列头排序、列过滤、进度条、状态标签、空结果提示和横向滚动。
+- 分页区支持首页、上一页、下一页、末页、页码跳转和 page size 切换。
+- 调试区通过折叠面板展示当前 `columnFilters` 和 `globalFilter` JSON。
+
 ## 表格能力
 
 `src/routes/demo/table.tsx` 使用 `useReactTable`，启用：
@@ -72,6 +84,14 @@ export type Person = DemoPersonSeed & {
 - `status`
 
 其中 `fullName` 使用 accessor function 拼接姓名，并使用 fuzzy filter/sort。
+
+状态字段在页面上显示为中文标签：
+
+| 数据值 | 页面标签 |
+| --- | --- |
+| `relationship` | 稳定 |
+| `complicated` | 需跟进 |
+| `single` | 新线索 |
 
 ## 数据流
 
@@ -112,7 +132,10 @@ export type Person = DemoPersonSeed & {
 - 确认页面包含 `demo_people` 表说明或种子数据。
 - 使用全局搜索，确认结果过滤正确。
 - 点击列头，确认排序切换正常。
+- 使用列过滤输入框，确认单列过滤正确。
 - 使用分页按钮、页码输入和 page size 下拉。
 - 新增记录后确认表格刷新，并且记录写入 SQLite。
-- 点击“重置数据库样例”后确认恢复固定样例数据。
+- 点击“重新读取接口”后确认 loader 数据刷新。
+- 点击“重置样例”后确认恢复固定样例数据。
+- 展开“查看当前筛选状态 JSON”，确认当前过滤状态可读。
 - 修改表格或数据库逻辑后运行 `npx biome check src/routes/demo/table.tsx src/db/demo-people.ts src/db/schema.ts src/data/demo-table-data.ts` 和 `npm run build`。
