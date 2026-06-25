@@ -61,7 +61,7 @@ function SettingsPage() {
 - 页面级视觉容器复用 `page-wrap`、`island-shell` 或 demo 语义类。
 - 首页是 Vibe Coding 的项目介绍页，首屏应保持清晰的项目名、协作价值、流程入口和验证门禁入口。首屏交互背景逻辑保留在 `src/routes/index.tsx` 内，样式使用 `vibe-tree-*` 和 `vibe-*` 语义类。
 - About 页面是 Vibe Coding 的项目理念介绍页，首屏使用动态 canvas 背景，交互逻辑保留在 `src/routes/about.tsx` 内，样式使用 `about-*` 语义类。
-- Docs 页面是本地文档中心，首屏使用可交互粒子背景、AI Core 面板、Agent Trace 控制台和 AI 信号带，交互逻辑保留在 `src/routes/docs.tsx` 内，样式使用 `docs-*` 语义类。
+- Docs 页面是本地文档中心，首屏使用低速可交互粒子背景、AI Core 面板、Agent Trace 控制台和 AI 信号带，交互逻辑保留在 `src/routes/docs.tsx` 内，样式使用 `docs-*` 语义类。
 - 外链必须设置 `target="_blank"` 时，同时添加 `rel="noopener noreferrer"` 或 `rel="noreferrer"`。
 - Demo 页面可以保留英文文案；正式业务页面建议统一中文。
 

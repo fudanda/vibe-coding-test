@@ -130,11 +130,12 @@ function DocsParticleBackground() {
 		const reduceMotion = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
 		).matches;
+		const motionScale = 0.42;
 		const nodes: ParticleNode[] = Array.from({ length: 68 }, (_, index) => ({
 			x: ((index * 61) % 100) / 100,
 			y: ((index * 43) % 100) / 100,
-			vx: (((index * 17) % 9) - 4) * 0.012,
-			vy: (((index * 29) % 9) - 4) * 0.012,
+			vx: (((index * 17) % 9) - 4) * 0.012 * motionScale,
+			vy: (((index * 29) % 9) - 4) * 0.012 * motionScale,
 			size: 1.8 + (index % 4) * 0.55,
 			phase: index * 0.51,
 		}));
@@ -254,6 +255,8 @@ function DocsParticleBackground() {
 		};
 
 		const draw = (time = 0) => {
+			const motionTime = time * motionScale;
+
 			ctx.clearRect(0, 0, width, height);
 
 			const base = ctx.createLinearGradient(0, 0, width, height);
@@ -263,15 +266,15 @@ function DocsParticleBackground() {
 			ctx.fillStyle = base;
 			ctx.fillRect(0, 0, width, height);
 
-			drawCircuitLines(time);
+			drawCircuitLines(motionTime);
 
 			const pointer = pointerRef.current;
 			const focusX = pointer.active
 				? pointer.x
-				: width * (0.68 + Math.sin(time * 0.00019) * 0.18);
+				: width * (0.68 + Math.sin(motionTime * 0.00019) * 0.18);
 			const focusY = pointer.active
 				? pointer.y
-				: height * (0.4 + Math.cos(time * 0.00023) * 0.2);
+				: height * (0.4 + Math.cos(motionTime * 0.00023) * 0.2);
 			const glow = ctx.createRadialGradient(
 				focusX,
 				focusY,
@@ -285,8 +288,8 @@ function DocsParticleBackground() {
 			glow.addColorStop(1, "rgba(98, 105, 216, 0)");
 			ctx.fillStyle = glow;
 			ctx.fillRect(0, 0, width, height);
-			drawNeuralSpine(time, focusX, focusY);
-			drawDataPackets(time);
+			drawNeuralSpine(motionTime, focusX, focusY);
+			drawDataPackets(motionTime);
 
 			const resolvedNodes = nodes.map((node) => {
 				if (!reduceMotion) {
@@ -301,11 +304,11 @@ function DocsParticleBackground() {
 
 				const drift = reduceMotion
 					? 0
-					: Math.sin(time * 0.00042 + node.phase) * 9;
+					: Math.sin(motionTime * 0.00042 + node.phase) * 9;
 
 				return {
 					x: node.x * width + drift,
-					y: node.y * height + Math.cos(time * 0.00036 + node.phase) * 7,
+					y: node.y * height + Math.cos(motionTime * 0.00036 + node.phase) * 7,
 					size: node.size,
 				};
 			});
@@ -360,7 +363,7 @@ function DocsParticleBackground() {
 
 			const scanY = reduceMotion
 				? height * 0.58
-				: ((time * 0.031) % (height + 180)) - 90;
+				: ((motionTime * 0.031) % (height + 180)) - 90;
 			const scan = ctx.createLinearGradient(0, scanY - 32, 0, scanY + 32);
 			scan.addColorStop(0, "rgba(255, 255, 255, 0)");
 			scan.addColorStop(0.5, "rgba(154, 161, 255, 0.13)");
