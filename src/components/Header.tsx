@@ -30,14 +30,13 @@ export default function Header() {
 					>
 						关于
 					</Link>
-					<a
-						href="https://tanstack.com/start/latest/docs/framework/react/overview"
+					<Link
+						to="/docs"
 						className="nav-link"
-						target="_blank"
-						rel="noreferrer"
+						activeProps={{ className: "nav-link is-active" }}
 					>
 						文档
-					</a>
+					</Link>
 					<details className="relative w-full sm:w-auto">
 						<summary className="nav-link list-none cursor-pointer">
 							示例

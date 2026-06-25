@@ -36,7 +36,7 @@ interface MyRouterContext {
 
 - `首页` -> `/`
 - `关于` -> `/about`
-- `文档` -> TanStack Start 官方文档
+- `文档` -> `/docs` 本地文档中心
 - `示例` -> 下拉菜单，包含 `表格示例`、`状态示例`、`查询示例`、`数据库示例`
 
 `src/router.tsx` 负责创建 TanStack Router，并把 QueryClient 放进 router context：

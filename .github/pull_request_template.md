@@ -10,6 +10,7 @@
 
 - 人工智能用于：
 - Token 消耗：
+- 提交和 PR 自动化档位：未使用 | 档位 1 | 档位 2
 - AI Review：
 - AI Review 快照：
 - AI Review 线程：
@@ -83,7 +84,10 @@ ADR：
 
 - [ ] 需求和验收标准清楚。
 - [ ] 人工智能生成内容已人工阅读。
+- [ ] 已判断是否需要使用 `/review` 或 `code_review.md` 做提交前自查。
 - [ ] 已判断是否需要调用 `code-reviewer` 做 AI 预审。
+- [ ] 如果使用档位 2，真实 `git add`、`commit`、`push` 和 PR 创建已由人工确认。
+- [ ] 没有使用 `git add .`。
 - [ ] 大 diff 或耗时 Review 已使用固定 diff 快照，或说明未使用原因。
 - [ ] 高风险变更已有人工 Review，没有只依赖 AI Review。
 - [ ] AI Review 发现的阻塞问题、测试缺口和剩余风险已处理或记录。
