@@ -11,6 +11,7 @@ TanStack Query 模块负责客户端查询状态、与 TanStack Router 的 SSR Q
 - `src/router.tsx`
 - `src/routes/demo/tanstack-query.tsx`
 - `src/routes/__root.tsx`
+- `src/db/todos.ts`
 
 ## 当前实现
 
@@ -49,11 +50,12 @@ export default {
 
 `src/routes/demo/tanstack-query.tsx` 使用 `useQuery`：
 
-- `queryKey: ['todos']`
-- `queryFn` 返回本地 Promise 数据
-- `initialData: []`
+- `queryKey: ['query-demo', 'todos']`
+- `queryFn` 调用 TanStack Start server function
+- server function 通过 `src/db/todos.ts` 从 SQLite `todos` 表读取真实数据
+- 页面提供 loading、error、empty、success 和手动刷新状态
 
-当前 demo 不访问远程接口，适合演示 Query 的基础渲染流程。
+当前 demo 访问本地 SQLite 数据库。`src/db/todos.ts` 会在首次访问时自动创建 `todos` 演示表并写入种子数据，因此不需要先手动跑 migration 才能打开查询示例。
 
 ## 开发方式
 
@@ -76,12 +78,13 @@ export default {
 
 - `getContext()` 当前每次创建新的 `QueryClient`，这符合按 router 实例隔离的思路；不要把它提升成跨请求共享的单例，避免 SSR 数据串扰。
 - `TanstackQueryProvider` 当前是空组件，实际集成点在 `router.tsx`，不要误以为它已经包裹了 React tree。
-- Query demo 的 `initialData: []` 会让页面无 loading 状态，正式接口需要补齐 loading、error、empty 状态。
+- Query demo 依赖服务端函数和 SQLite；如果 `DATABASE_URL` 缺失或数据库无法打开，页面会进入 error 状态。
+- `todos` 是演示表，运行时自动建表只用于本地 demo；正式业务数据仍应走 migration 和更严格的输入校验。
 
 ## 验证清单
 
-- 访问 `/demo/tanstack-query`，确认列表展示 Alice、Bob、Charlie。
+- 访问 `/demo/tanstack-query`，确认列表展示来自 SQLite `todos` 表的真实记录。
+- 点击“重新查询”，确认 React Query 能重新请求服务端函数。
 - 打开 TanStack Devtools，确认 Query 面板存在。
-- 新增真实接口查询后，验证 loading、error、success 三种状态。
+- 修改查询接口后，验证 loading、error、empty、success 四种状态。
 - 修改 Query 集成后运行 `npm run build`。
-

@@ -26,7 +26,7 @@
 | `/docs` | `src/routes/docs.tsx` | 本地文档中心，包含 AI 科技感粒子背景、AI Core/HUD、规则入口、流程入口和本地文档清单 |
 | `/demo/table` | `src/routes/demo/table.tsx` | TanStack Table demo |
 | `/demo/store` | `src/routes/demo/store.tsx` | TanStack Store demo |
-| `/demo/tanstack-query` | `src/routes/demo/tanstack-query.tsx` | TanStack Query demo |
+| `/demo/tanstack-query` | `src/routes/demo/tanstack-query.tsx` | TanStack Query + SQLite 查询 demo |
 | `/demo/drizzle` | `src/routes/demo/drizzle.tsx` | Drizzle SQLite Todo demo |
 
 `src/routeTree.gen.ts` 是自动生成文件，包含所有文件路由的类型映射。不要手动修改这个文件。
@@ -77,6 +77,8 @@ export const Route = createFileRoute('/demo/drizzle')({
 ```
 
 组件内通过 `Route.useLoaderData()` 读取 loader 数据。提交 Todo 后调用 `router.invalidate()` 触发重新加载。
+
+`src/routes/demo/tanstack-query.tsx` 使用 `useQuery()` 调用服务端函数查询 `todos` 表。它和 `/demo/drizzle` 复用 `src/db/todos.ts`，首次访问会自动创建演示表和种子数据。
 
 ## 验证清单
 
