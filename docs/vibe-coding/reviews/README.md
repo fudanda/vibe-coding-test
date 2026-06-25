@@ -35,6 +35,16 @@ docs/vibe-coding/reviews/2026/06/2026-06-24-1157-vibe-coding-test-current.diff
 5. Review 返回后，主开发线程整合阻塞问题、非阻塞问题、测试缺口和疑问。
 6. 如果快照后被审文件继续变化，标记 Review 过期，并重新审查或人工确认差异。
 
+## 自动触发受阻
+
+本项目长期授权功能完成后自动触发独立 Review 和提交准备。如果当前 Codex App、CLI、子智能体或线程工具策略阻止自动新建 Review 或提交准备对话，主开发线程必须输出可直接粘贴的新对话交接 prompt，并在 Review 字段记录：
+
+```text
+Review：未评审（自动触发受阻，已输出独立提交准备交接 prompt）
+```
+
+自动触发失败不是 Review 通过，也不能作为本地 commit 的门禁通过依据。
+
 ## Review 字段写法
 
 ```text

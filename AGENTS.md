@@ -91,6 +91,8 @@
 ## 提交与 PR 准备流程
 
 - 本项目默认采用“提交与 PR 准备流程”：Codex 必须自动检查 diff、补 change fragment、运行验证、调用 `code-reviewer` 做 AI Review、生成中文 Lore 提交信息和 PR 描述草案。
+- 本项目长期授权自动触发：用户已要求“每次有意义功能修改完成后自动触发独立 Review 和提交准备”。因此功能完成时，Codex 不应等待用户再次说“创建新对话”，而应先尝试调用 Codex App `create_thread`。
+- 如果当前 Codex App、CLI、子智能体或线程工具策略阻止自动调用，必须在最终结果中明确写出“自动触发受阻”的原因，并输出完整可粘贴的独立提交准备交接 prompt；不得静默跳过，不得只写“未评审”，也不得退回当前对话直接 commit。
 - 每次有意义的功能修改完成后，必须优先新建独立 Codex 对话执行提交与 PR 准备流程。
 - 当前开发对话只负责实现、验证、文档同步、change fragment 和交付交接包，不直接执行 `git add`、`git commit`、`git push` 或 `gh pr create`。
 - 只有用户明确说“在当前对话直接提交”“当前对话执行 commit”“不要新建对话，直接提交”时，当前开发对话才允许在门禁通过后执行 Review 和本地 commit。
@@ -100,5 +102,6 @@
 - 自动 Git 提交必须按明确文件路径暂存；禁止仓库级暂存命令，例如 `git add .`、`git add -A` 或通配暂存。
 - 自动 Git 操作只默认覆盖本地 status/diff/add/commit；不包含 `git push`、`gh pr create`、合并或发布，这些动作仍需单独确认。
 - 如果 `code-reviewer` 超时、不可用或发现阻塞问题，必须停止自动提交，记录原因并等待人工处理或重新 Review。
+- 自动触发失败不是通过；Review 字段应写 `未评审（自动触发受阻，已输出独立提交准备交接 prompt）` 或更具体原因。
 - 没有验证证据时不能声称“可合并”或“已完成”。
 - 高风险变更必须保留人工 Review，不能只依赖 AI Review。
