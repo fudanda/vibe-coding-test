@@ -39,7 +39,7 @@ export function listTodos() {
 	ensureTodosTable();
 
 	return db.query.todos.findMany({
-		orderBy: [desc(todos.createdAt)],
+		orderBy: [desc(todos.createdAt), desc(todos.id)],
 	});
 }
 
@@ -50,6 +50,18 @@ export function createTodoItem(input: CreateTodoInput) {
 		.values({ title: normalizeTodoTitle(input.title) })
 		.run();
 	return { success: true };
+}
+
+export function resetTodoItems() {
+	ensureTodosTable();
+
+	db.transaction((tx) => {
+		tx.delete(todos).run();
+		tx.run(sql`DELETE FROM sqlite_sequence WHERE name = 'todos'`);
+		tx.insert(todos).values(todoSeed).run();
+	});
+
+	return listTodos();
 }
 
 function normalizeTodoTitle(value: unknown) {

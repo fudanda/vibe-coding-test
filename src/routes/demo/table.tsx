@@ -39,28 +39,35 @@ import {
 	UserPlus,
 } from "lucide-react";
 import React from "react";
-import type { Person } from "#/data/demo-table-data";
-import { demoPersonStatuses } from "#/data/demo-table-data";
 import {
-	createDemoPerson,
-	listDemoPeople,
-	normalizeDemoPersonInput,
-	resetDemoPeople,
-} from "#/db/demo-people";
+	type DemoPersonSeed,
+	type DemoPersonStatus,
+	demoPersonStatuses,
+	type Person,
+} from "#/data/demo-table-data";
 
 const getTablePeople = createServerFn({
 	method: "GET",
-}).handler(() => listDemoPeople());
+}).handler(async () => {
+	const { listDemoPeople } = await import("#/db/demo-people");
+	return listDemoPeople();
+});
 
 const createTablePerson = createServerFn({
 	method: "POST",
 })
-	.validator(normalizeDemoPersonInput)
-	.handler(({ data }) => createDemoPerson(data));
+	.validator(normalizeTablePersonInput)
+	.handler(async ({ data }) => {
+		const { createDemoPerson } = await import("#/db/demo-people");
+		return createDemoPerson(data);
+	});
 
 const resetTablePeople = createServerFn({
 	method: "POST",
-}).handler(() => resetDemoPeople());
+}).handler(async () => {
+	const { resetDemoPeople } = await import("#/db/demo-people");
+	return resetDemoPeople();
+});
 
 export const Route = createFileRoute("/demo/table")({
 	component: TableDemo,
@@ -120,6 +127,46 @@ const pipelineSteps = [
 	["02", "Server Function", "新增、重置和重新读取都经过服务端边界。"],
 	["03", "TanStack Table", "在客户端完成搜索、过滤、排序和分页。"],
 ];
+
+function normalizeTablePersonInput(data: unknown): DemoPersonSeed {
+	const input = data as Partial<Record<keyof DemoPersonSeed, unknown>>;
+
+	return {
+		firstName: normalizeText(input.firstName, "Ada"),
+		lastName: normalizeText(input.lastName, "Lovelace"),
+		age: normalizeNumber(input.age, 18, 99, 32),
+		visits: normalizeNumber(input.visits, 0, 9999, 100),
+		progress: normalizeNumber(input.progress, 0, 100, 50),
+		status: normalizeStatus(input.status),
+	};
+}
+
+function normalizeText(value: unknown, fallback: string) {
+	if (typeof value !== "string") return fallback;
+
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed.slice(0, 60) : fallback;
+}
+
+function normalizeNumber(
+	value: unknown,
+	min: number,
+	max: number,
+	fallback: number,
+) {
+	const parsed =
+		typeof value === "number" ? value : Number.parseInt(String(value), 10);
+
+	if (!Number.isFinite(parsed)) return fallback;
+
+	return Math.min(Math.max(parsed, min), max);
+}
+
+function normalizeStatus(value: unknown): DemoPersonStatus {
+	return demoPersonStatuses.includes(value as DemoPersonStatus)
+		? (value as DemoPersonStatus)
+		: "single";
+}
 
 // Define a custom fuzzy filter function that will apply ranking info to rows (using match-sorter utils)
 const fuzzyFilter: FilterFn<Person> = (row, columnId, value, addMeta) => {

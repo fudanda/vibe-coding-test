@@ -12,11 +12,11 @@ import {
 	Server,
 	Sparkles,
 } from "lucide-react";
-import { listTodos } from "#/db/todos";
 
 const getQueryTodos = createServerFn({
 	method: "GET",
 }).handler(async () => {
+	const { listTodos } = await import("#/db/todos");
 	return await listTodos();
 });
 
