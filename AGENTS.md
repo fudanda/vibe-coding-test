@@ -91,9 +91,11 @@
 ## 提交与 PR 准备流程
 
 - 本项目默认采用“提交与 PR 准备流程”：Codex 必须自动检查 diff、补 change fragment、运行验证、调用 `code-reviewer` 做 AI Review、生成中文 Lore 提交信息和 PR 描述草案。
-- 每次有意义的修改完成后，默认在当前开发对话继续完成提交与 PR 准备并执行本地 commit；只有 diff 较大、Review 耗时较长、开发者需要继续开发，或工作区存在并行改动时，才新建独立 Codex 对话。
+- 每次有意义的功能修改完成后，必须优先新建独立 Codex 对话执行提交与 PR 准备流程。
+- 当前开发对话只负责实现、验证、文档同步、change fragment 和交付交接包，不直接执行 `git add`、`git commit`、`git push` 或 `gh pr create`。
+- 只有用户明确说“在当前对话直接提交”“当前对话执行 commit”“不要新建对话，直接提交”时，当前开发对话才允许在门禁通过后执行 Review 和本地 commit。
 - 交付交接包必须包含：任务标题、仓库路径、关键文件或 diff 快照、change fragment、验证证据、风险和未验证项。
-- 默认情况下，Codex 在自动提交门禁通过后执行本地 `git commit`，并在最终结果中给出 commit hash。
+- 独立提交准备对话中，Codex 在自动提交门禁通过后执行本地 `git commit`，并在最终结果中给出 commit hash。
 - 自动提交前必须检查 `git status` 和 `git diff`，排除无关改动，补齐 change fragment，记录验证证据，生成中文 Lore 提交信息，确认 `code-reviewer` 无阻塞问题，并按明确文件路径暂存。
 - 自动 Git 提交必须按明确文件路径暂存；禁止仓库级暂存命令，例如 `git add .`、`git add -A` 或通配暂存。
 - 自动 Git 操作只默认覆盖本地 status/diff/add/commit；不包含 `git push`、`gh pr create`、合并或发布，这些动作仍需单独确认。
