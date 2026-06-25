@@ -21,7 +21,7 @@
 
 | URL | 文件 | 说明 |
 | --- | --- | --- |
-| `/` | `src/routes/index.tsx` | Vibe Coding 项目介绍首页，展示协作流程、Codex 插件能力和验证门禁 |
+| `/` | `src/routes/index.tsx` | Vibe Coding 项目介绍首页，包含可交互粒子树背景、协作流程、Codex 插件能力和验证门禁 |
 | `/about` | `src/routes/about.tsx` | Vibe Coding 科技感介绍页，包含可交互 canvas 背景、协作链路、核心原则和工作流说明 |
 | `/docs` | `src/routes/docs.tsx` | 本地文档中心，包含 AI 科技感粒子背景、AI Core/HUD、规则入口、流程入口和本地文档清单 |
 | `/demo/table` | `src/routes/demo/table.tsx` | TanStack Table demo |
@@ -59,7 +59,7 @@ function SettingsPage() {
 - 页面组件首选放在路由文件内部，只有被多个页面复用时再抽到 `src/components`。
 - 页面根元素优先使用 `<main>`，便于语义化和可访问性。
 - 页面级视觉容器复用 `page-wrap`、`island-shell` 或 demo 语义类。
-- 首页是 Vibe Coding 的项目介绍页，首屏应保持清晰的项目名、协作价值、流程入口和验证门禁入口。
+- 首页是 Vibe Coding 的项目介绍页，首屏应保持清晰的项目名、协作价值、流程入口和验证门禁入口。首屏交互背景逻辑保留在 `src/routes/index.tsx` 内，样式使用 `vibe-tree-*` 和 `vibe-*` 语义类。
 - About 页面是 Vibe Coding 的项目理念介绍页，首屏使用动态 canvas 背景，交互逻辑保留在 `src/routes/about.tsx` 内，样式使用 `about-*` 语义类。
 - Docs 页面是本地文档中心，首屏使用可交互粒子背景、AI Core 面板、Agent Trace 控制台和 AI 信号带，交互逻辑保留在 `src/routes/docs.tsx` 内，样式使用 `docs-*` 语义类。
 - 外链必须设置 `target="_blank"` 时，同时添加 `rel="noopener noreferrer"` 或 `rel="noreferrer"`。
