@@ -43,8 +43,31 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  notFoundComponent: RootNotFound,
   shellComponent: RootDocument,
 })
+
+function RootNotFound() {
+  return (
+    <main className="page-wrap px-4 py-20">
+      <section className="island-shell mx-auto max-w-3xl p-8 text-center">
+        <p className="island-kicker mb-3">404</p>
+        <h1 className="m-0 text-3xl font-bold text-[var(--sea-ink)]">
+          页面没有找到
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--sea-ink-soft)]">
+          这个地址没有匹配到当前项目路由。你可以返回首页，或通过顶部导航重新进入项目文档、变更图和示例页面。
+        </p>
+        <a
+          className="mt-6 inline-flex rounded-full bg-[var(--sea-ink)] px-5 py-2.5 text-sm font-semibold text-white no-underline shadow-[0_12px_28px_rgba(26,76,72,0.18)] transition hover:-translate-y-0.5"
+          href="/"
+        >
+          返回首页
+        </a>
+      </section>
+    </main>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

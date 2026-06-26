@@ -32,6 +32,8 @@ interface MyRouterContext {
 
 主题初始化脚本会在 React hydration 前读取 `localStorage.theme`，避免页面首次渲染时主题闪烁。
 
+根路由配置了 `notFoundComponent`，当未知 URL 或下级 loader 抛出 `notFound()` 时，会渲染中文 404 兜底页，避免 TanStack Router 使用默认 `<p>Not Found</p>` 并在开发控制台持续输出缺少 notFound 组件的警告。
+
 `src/components/Header.tsx` 提供公共导航。当前可见菜单使用中文：
 
 - `首页` -> `/`
@@ -60,6 +62,7 @@ interface MyRouterContext {
 
 - `THEME_INIT_SCRIPT` 运行在浏览器环境，必须保持可直接内联执行，不要引用外部变量。
 - 如果修改 `MyRouterContext`，需要同步检查 `src/router.tsx` 中的 `getContext()` 返回值。
+- 如果新增会抛出 `notFound()` 的页面或 loader，确认根路由 404 兜底仍能渲染，并检查控制台没有 `notFoundComponent` 缺失警告。
 - `TanStackDevtools` 当前注册了 Router、Store、Query 三个面板，删除 demo 模块时要同步清理对应 devtools 插件。
 - 根文档语言当前是 `en`，如果项目正式中文化，可以改为 `zh-CN` 并检查 SEO/meta 文案。
 
@@ -67,5 +70,6 @@ interface MyRouterContext {
 
 - 运行 `npm run build`，确认 SSR 构建通过。
 - 启动 `npm run dev` 后检查首页、About 和 demo 页面是否都能渲染 Header/Footer。
+- 访问一个不存在的 URL，确认显示中文 404 兜底页且控制台没有 notFound 组件缺失警告。
 - 切换主题后刷新页面，确认主题不会闪烁回默认值。
 - 打开 TanStack Devtools，确认 Router、Store、Query 面板能正常显示。

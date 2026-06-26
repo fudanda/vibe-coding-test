@@ -100,5 +100,6 @@ export const Route = createFileRoute('/demo/drizzle')({
 - 检查 `src/routeTree.gen.ts` 是否包含新路径。
 - 在浏览器访问新 URL，确认刷新页面也能正常进入。
 - 如果路由出现在 Header，检查 active 状态是否正确。
+- 访问不存在的 URL，确认根路由 404 兜底页正常显示，且控制台没有 `notFoundComponent` 缺失警告。
 - 如果更新 `/changes` 页面，抽查 2-3 条 change fragment，确认页面展示内容和 Markdown 记录一致。
 - 如果更新 `/project-docs` 页面，检查模块文档、变更记录和单篇 Markdown 详情页都能打开。
