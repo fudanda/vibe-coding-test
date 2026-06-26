@@ -282,12 +282,12 @@ pre code {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background-color: #071317;
+  background-color: #02040a;
   background-image:
-    radial-gradient(circle at 68% 28%, rgba(96, 215, 207, 0.24), transparent 28rem),
-    radial-gradient(circle at 16% 72%, rgba(255, 138, 104, 0.18), transparent 24rem),
-    linear-gradient(90deg, rgba(7, 19, 23, 0.96) 0%, rgba(7, 19, 23, 0.84) 44%, rgba(12, 20, 48, 0.7) 100%),
-    #071317;
+    radial-gradient(circle at 62% 38%, rgba(96, 215, 207, 0.2), transparent 28rem),
+    radial-gradient(circle at 20% 75%, rgba(255, 210, 122, 0.14), transparent 24rem),
+    linear-gradient(90deg, rgba(2, 4, 10, 0.97) 0%, rgba(4, 13, 25, 0.9) 46%, rgba(10, 15, 36, 0.74) 100%),
+    #02040a;
   background-position: center;
   background-size: cover;
 }
@@ -300,43 +300,44 @@ pre code {
   pointer-events: none;
   opacity: 0.22;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: linear-gradient(90deg, black, transparent 76%);
+    linear-gradient(rgba(216, 255, 247, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216, 255, 247, 0.1) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(90deg, black, transparent 78%);
 }
 
-.vibe-tree-background,
-.vibe-tree-canvas {
+.vibe-space-background,
+.vibe-space-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.vibe-tree-background {
+.vibe-space-background {
   z-index: 0;
   pointer-events: none;
 }
 
-.vibe-tree-background::after {
+.vibe-space-background::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(7, 19, 23, 0.36), rgba(7, 19, 23, 0.12) 46%, rgba(7, 19, 23, 0.62)),
-    linear-gradient(180deg, transparent 62%, rgba(7, 19, 23, 0.72));
+    radial-gradient(circle at 55% 48%, transparent 0 14rem, rgba(2, 4, 10, 0.18) 27rem),
+    linear-gradient(90deg, rgba(2, 4, 10, 0.38), rgba(2, 4, 10, 0.08) 48%, rgba(2, 4, 10, 0.68)),
+    linear-gradient(180deg, transparent 60%, rgba(2, 4, 10, 0.78));
 }
 
-.vibe-tree-signal {
+.vibe-space-signal {
   position: absolute;
   z-index: 3;
   display: none;
   border: 1px solid rgba(216, 255, 247, 0.18);
   border-radius: 8px;
   padding: 0.74rem 0.86rem;
-  background: rgba(7, 19, 23, 0.5);
+  background: rgba(2, 4, 10, 0.56);
   color: #d9fff7;
   pointer-events: none;
   box-shadow:
@@ -345,7 +346,7 @@ pre code {
   backdrop-filter: blur(14px);
 }
 
-.vibe-tree-signal::before {
+.vibe-space-signal::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -358,7 +359,7 @@ pre code {
   box-shadow: 0 0 18px rgba(96, 215, 207, 0.8);
 }
 
-.vibe-tree-signal span {
+.vibe-space-signal span {
   display: block;
   margin-bottom: 0.15rem;
   color: rgba(216, 255, 247, 0.58);
@@ -367,17 +368,17 @@ pre code {
   letter-spacing: 0.14em;
 }
 
-.vibe-tree-signal strong {
+.vibe-space-signal strong {
   color: var(--amber);
   font-size: 0.86rem;
 }
 
-.vibe-tree-signal-left {
-  top: 5.8rem;
+.vibe-space-signal-left {
+  top: 0.35rem;
   left: max(1.25rem, calc((100vw - 72rem) / 2));
 }
 
-.vibe-tree-signal-right {
+.vibe-space-signal-right {
   right: max(1.25rem, calc((100vw - 72rem) / 2));
   bottom: 5rem;
 }
@@ -3934,7 +3935,7 @@ pre code {
     display: block;
   }
 
-  .vibe-tree-signal {
+  .vibe-space-signal {
     display: block;
   }
 

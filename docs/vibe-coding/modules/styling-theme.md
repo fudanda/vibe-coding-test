@@ -26,7 +26,7 @@
 - Tailwind inline theme 映射：`@theme inline`
 - 全局 body 背景、文本、链接、code、pre 样式
 - 共享类：`page-wrap`、`display-title`、`island-shell`、`feature-card`、`nav-link`、`rise-in`
-- 首页专用类：`vibe-hero`、`vibe-step-card`、`vibe-terminal`、`vibe-review-panel`、`vibe-check-row`
+- 首页专用类：`vibe-hero`、`vibe-space-background`、`vibe-space-signal`、`vibe-step-card`、`vibe-terminal`、`vibe-review-panel`、`vibe-check-row`
 - About 页面专用类：`about-tech-scene`、`about-tech-background`、`about-signal-panel`、`about-principle-card`、`about-timeline`、`about-command-panel`
 - 数据库示例专用类：`db-console-shell`、`db-hero-panel`、`db-flow-panel`、`db-stat-card`、`db-mutation-panel`、`db-records-panel`
 - 查询示例专用类：`query-console-shell`、`query-hero-panel`、`query-status-panel`、`query-stat-card`、`query-results-panel`、`query-source-panel`
@@ -54,7 +54,9 @@
 | `feature-card` | 首页特性卡片 |
 | `nav-link` | Header 导航链接和 active 下划线 |
 | `rise-in` | 入场动画 |
-| `vibe-hero` | Vibe Coding 首页首屏真实图片背景 |
+| `vibe-hero` | Vibe Coding 首页首屏太空飞船粒子场容器 |
+| `vibe-space-background` | 首页 canvas 太空星场、轨道和飞船背景挂载层 |
+| `vibe-space-signal` | 首页太空任务信号标签 |
 | `vibe-step-card` | Vibe Coding 流程阶段卡片 |
 | `vibe-terminal` | Codex 插件流程终端展示 |
 | `vibe-review-panel` | 验证门禁说明面板 |
@@ -120,7 +122,7 @@
 
 - 浅色、深色、auto 三种主题都检查一遍。
 - 检查首页、About、四个 demo 页面。
-- 首页首屏使用远程 Unsplash 图片作为背景；如果生产环境不允许外链图片，需要替换为本地静态资源。
+- 首页首屏使用本地 canvas 绘制太空飞船粒子场，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠，鼠标移动和点击有克制的轨道/脉冲反馈。
 - About 首屏使用本地 canvas 绘制动态网络背景，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠。
 - 数据库示例页面使用 CSS 动态网格背景和 `db-*` 类，不依赖远程图片或新增依赖；桌面和移动端都应确认写入表单、schema 和记录列表不溢出。
 - 查询示例页面使用 CSS 动态网格背景和 `query-*` 类，不依赖远程图片或新增依赖。

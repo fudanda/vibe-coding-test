@@ -60,83 +60,72 @@ const guardrails = [
 	"AI 参与范围必须写清楚",
 ];
 
-type TreeNode = {
+type SpaceParticle = {
 	x: number;
 	y: number;
-	layer: number;
+	depth: number;
 	phase: number;
 	size: number;
+	drift: number;
+	kind: "star" | "trail" | "beacon";
 };
 
-function createTreeNodes() {
-	const nodes: TreeNode[] = [];
+const missionNodes = [
+	{ label: "INTAKE", x: 0.22, y: 0.66, phase: 0.2 },
+	{ label: "PLAN", x: 0.38, y: 0.38, phase: 1.1 },
+	{ label: "REVIEW", x: 0.68, y: 0.33, phase: 2.4 },
+	{ label: "VERIFY", x: 0.78, y: 0.62, phase: 3.2 },
+];
 
-	for (let index = 0; index < 20; index += 1) {
-		nodes.push({
-			x: 0.52 + Math.sin(index * 0.48) * 0.012,
-			y: 0.88 - index * 0.035,
-			layer: 1,
-			phase: index * 0.52,
-			size: 2.5 + (index % 3) * 0.35,
+function createSpaceParticles() {
+	const particles: SpaceParticle[] = [];
+
+	for (let index = 0; index < 128; index += 1) {
+		const angle = index * 2.399963;
+		const radius = Math.sqrt((index + 8) / 136);
+
+		particles.push({
+			x: 0.5 + Math.cos(angle) * radius * 0.56,
+			y: 0.5 + Math.sin(angle * 1.13) * radius * 0.42,
+			depth: 0.35 + (index % 7) * 0.12,
+			phase: index * 0.47,
+			size: 0.9 + (index % 5) * 0.34,
+			drift: 0.5 + (index % 6) * 0.24,
+			kind: "star",
 		});
 	}
 
-	for (let level = 0; level < 9; level += 1) {
-		const baseY = 0.78 - level * 0.061;
-		const length = 0.13 + level * 0.027;
+	for (let index = 0; index < 42; index += 1) {
+		const progress = index / 41;
+		const sway = Math.sin(index * 0.9) * 0.035;
 
-		for (const direction of [-1, 1]) {
-			for (let segment = 1; segment <= 6; segment += 1) {
-				const progress = segment / 6;
-				nodes.push({
-					x:
-						0.52 +
-						direction *
-							length *
-							progress ** 0.82 *
-							(1 + Math.sin(level + segment) * 0.06),
-					y:
-						baseY -
-						progress * (0.04 + level * 0.012) +
-						Math.sin(segment * 0.9 + level) * 0.01,
-					layer: 2,
-					phase: level * 0.71 + segment * 0.43 + direction,
-					size: 1.9 + ((level + segment) % 4) * 0.26,
-				});
-			}
-		}
-	}
-
-	for (let index = 0; index < 82; index += 1) {
-		const angle = index * 2.399;
-		const radius = Math.sqrt((index + 3) / 85);
-
-		nodes.push({
-			x: 0.52 + Math.cos(angle) * radius * 0.31,
-			y: 0.29 + Math.sin(angle) * radius * 0.19,
-			layer: 3,
-			phase: index * 0.37,
-			size: 1.7 + (index % 5) * 0.22,
+		particles.push({
+			x: 0.14 + progress * 0.72,
+			y: 0.78 - progress * 0.48 + sway,
+			depth: 1.05,
+			phase: index * 0.6,
+			size: 1.2 + (index % 4) * 0.28,
+			drift: 1.2,
+			kind: "trail",
 		});
 	}
 
-	for (let index = 0; index < 26; index += 1) {
-		const direction = index % 2 === 0 ? -1 : 1;
-		const progress = (index % 13) / 12;
-
-		nodes.push({
-			x: 0.52 + direction * progress * 0.22,
-			y: 0.88 + progress * 0.1 + Math.sin(index) * 0.01,
-			layer: 0,
-			phase: index * 0.64,
-			size: 1.8,
+	for (const [index, node] of missionNodes.entries()) {
+		particles.push({
+			x: node.x,
+			y: node.y,
+			depth: 1.4,
+			phase: node.phase + index,
+			size: 3.2,
+			drift: 0.2,
+			kind: "beacon",
 		});
 	}
 
-	return nodes;
+	return particles;
 }
 
-function ParticleTreeBackground() {
+function SpaceMissionBackground() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapRef = useRef<HTMLDivElement>(null);
 	const pointerRef = useRef({ active: false, x: 0, y: 0 });
@@ -156,7 +145,7 @@ function ParticleTreeBackground() {
 			return;
 		}
 
-		const nodes = createTreeNodes();
+		const particles = createSpaceParticles();
 		const reduceMotion = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
 		).matches;
@@ -177,40 +166,78 @@ function ParticleTreeBackground() {
 			ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 		};
 
-		const drawTrunk = (time: number) => {
-			const trunkGradient = ctx.createLinearGradient(
-				width * 0.52,
-				height * 0.2,
-				width * 0.52,
-				height * 0.92,
-			);
-			trunkGradient.addColorStop(0, "rgba(255, 210, 122, 0.18)");
-			trunkGradient.addColorStop(0.48, "rgba(96, 215, 207, 0.34)");
-			trunkGradient.addColorStop(1, "rgba(255, 138, 104, 0.2)");
-
-			ctx.strokeStyle = trunkGradient;
-			ctx.lineWidth = Math.max(2, width * 0.006);
+		const drawOrbitLane = (
+			centerX: number,
+			centerY: number,
+			radiusX: number,
+			radiusY: number,
+			rotation: number,
+			alpha: number,
+		) => {
+			ctx.save();
+			ctx.translate(centerX, centerY);
+			ctx.rotate(rotation);
+			ctx.strokeStyle = `rgba(134, 245, 231, ${alpha})`;
+			ctx.lineWidth = 1;
+			ctx.setLineDash([7, 18]);
 			ctx.lineCap = "round";
 			ctx.beginPath();
-			ctx.moveTo(width * 0.52, height * 0.9);
-			ctx.bezierCurveTo(
-				width * (0.5 + Math.sin(time * 0.0004) * 0.015),
-				height * 0.68,
-				width * (0.55 + Math.cos(time * 0.00032) * 0.018),
-				height * 0.45,
-				width * 0.52,
-				height * 0.19,
-			);
+			ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
 			ctx.stroke();
+			ctx.restore();
+		};
+
+		const drawShip = (
+			shipX: number,
+			shipY: number,
+			angle: number,
+			thrust: number,
+		) => {
+			ctx.save();
+			ctx.translate(shipX, shipY);
+			ctx.rotate(angle);
+
+			const scale = Math.max(0.82, Math.min(width, height) / 760);
+
+			ctx.shadowBlur = 22;
+			ctx.shadowColor = "rgba(96, 215, 207, 0.55)";
+			ctx.fillStyle = "rgba(225, 255, 251, 0.96)";
+			ctx.beginPath();
+			ctx.moveTo(26 * scale, 0);
+			ctx.lineTo(-17 * scale, -12 * scale);
+			ctx.lineTo(-9 * scale, 0);
+			ctx.lineTo(-17 * scale, 12 * scale);
+			ctx.closePath();
+			ctx.fill();
+
+			ctx.shadowBlur = 0;
+			ctx.fillStyle = "rgba(10, 26, 38, 0.82)";
+			ctx.beginPath();
+			ctx.ellipse(3 * scale, 0, 7 * scale, 4 * scale, 0, 0, Math.PI * 2);
+			ctx.fill();
+
+			const flame = ctx.createLinearGradient(-18 * scale, 0, -44 * scale, 0);
+			flame.addColorStop(0, `rgba(255, 210, 122, ${0.58 + thrust * 0.25})`);
+			flame.addColorStop(0.45, `rgba(255, 107, 77, ${0.32 + thrust * 0.18})`);
+			flame.addColorStop(1, "rgba(255, 107, 77, 0)");
+			ctx.fillStyle = flame;
+			ctx.beginPath();
+			ctx.moveTo(-14 * scale, -6 * scale);
+			ctx.lineTo((-38 - thrust * 16) * scale, 0);
+			ctx.lineTo(-14 * scale, 6 * scale);
+			ctx.closePath();
+			ctx.fill();
+
+			ctx.restore();
 		};
 
 		const draw = (time = 0) => {
 			ctx.clearRect(0, 0, width, height);
 
 			const base = ctx.createLinearGradient(0, 0, width, height);
-			base.addColorStop(0, "#061016");
-			base.addColorStop(0.52, "#0b1c20");
-			base.addColorStop(1, "#11152d");
+			base.addColorStop(0, "#02040a");
+			base.addColorStop(0.42, "#06121d");
+			base.addColorStop(1, "#0f1730");
 			ctx.fillStyle = base;
 			ctx.fillRect(0, 0, width, height);
 
@@ -218,10 +245,13 @@ function ParticleTreeBackground() {
 			const pulse = pulseRef.current;
 			const focusX = pointer.active
 				? pointer.x
-				: width * (0.68 + Math.sin(time * 0.00018) * 0.1);
+				: width * (0.62 + Math.sin(time * 0.00016) * 0.08);
 			const focusY = pointer.active
 				? pointer.y
-				: height * (0.34 + Math.cos(time * 0.0002) * 0.12);
+				: height * (0.44 + Math.cos(time * 0.00018) * 0.1);
+			const shipX = width * 0.55 + (focusX - width * 0.5) * 0.05;
+			const shipY = height * 0.48 + (focusY - height * 0.5) * 0.04;
+			const shipAngle = Math.atan2(focusY - shipY, focusX - shipX);
 
 			const halo = ctx.createRadialGradient(
 				focusX,
@@ -232,49 +262,91 @@ function ParticleTreeBackground() {
 				Math.max(width, height) * (0.28 + pulse * 0.18),
 			);
 			halo.addColorStop(0, `rgba(255, 210, 122, ${0.18 + pulse * 0.2})`);
-			halo.addColorStop(0.34, "rgba(96, 215, 207, 0.11)");
+			halo.addColorStop(0.36, "rgba(96, 215, 207, 0.12)");
 			halo.addColorStop(1, "rgba(96, 215, 207, 0)");
 			ctx.fillStyle = halo;
 			ctx.fillRect(0, 0, width, height);
 
-			drawTrunk(time);
+			const lanePulse = reduceMotion ? 0 : Math.sin(time * 0.0008) * 0.08;
+			drawOrbitLane(shipX, shipY, width * 0.28, height * 0.16, -0.38, 0.16);
+			drawOrbitLane(shipX, shipY, width * 0.39, height * 0.23, 0.22, 0.1);
+			drawOrbitLane(
+				shipX,
+				shipY,
+				width * 0.16,
+				height * 0.1,
+				0.72,
+				0.22 + lanePulse,
+			);
 
-			const resolvedNodes = nodes.map((node) => {
-				const baseX = node.x * width;
-				const baseY = node.y * height;
-				const wave = reduceMotion
+			const visibleParticles =
+				width < 720
+					? particles.filter(
+							(particle, index) => particle.kind !== "star" || index % 2 === 0,
+						)
+					: particles;
+
+			const resolvedParticles = visibleParticles.map((particle) => {
+				const parallaxX =
+					(focusX / Math.max(width, 1) - 0.5) * particle.depth * 22;
+				const parallaxY =
+					(focusY / Math.max(height, 1) - 0.5) * particle.depth * 14;
+				const drift = reduceMotion
 					? 0
-					: Math.sin(time * 0.00055 + node.phase) * (node.layer + 1) * 1.8;
+					: Math.sin(time * 0.00034 * particle.drift + particle.phase) *
+						particle.depth *
+						7;
+				const baseX = particle.x * width;
+				const baseY = particle.y * height;
 				const distance = Math.hypot(baseX - focusX, baseY - focusY);
-				const pull = pointer.active ? Math.max(0, 1 - distance / 260) : 0;
-				const pulsePush = pulse * Math.max(0, 1 - distance / 360);
+				const pull = pointer.active ? Math.max(0, 1 - distance / 280) : 0;
+				const pulsePush = pulse * Math.max(0, 1 - distance / 420);
 
 				return {
-					x: baseX + wave + (focusX - baseX) * pull * 0.06,
-					y: baseY + wave * 0.35 + (focusY - baseY) * pull * 0.035,
-					layer: node.layer,
-					size: node.size + pull * 2 + pulsePush * 3,
+					x: baseX + parallaxX + drift + (focusX - baseX) * pull * 0.035,
+					y: baseY + parallaxY + drift * 0.28 + (focusY - baseY) * pull * 0.025,
+					kind: particle.kind,
+					phase: particle.phase,
+					size: particle.size + pull * 1.7 + pulsePush * 2.8,
 					active: pull + pulsePush,
 				};
 			});
 
-			for (let i = 0; i < resolvedNodes.length; i += 1) {
-				const a = resolvedNodes[i];
+			for (const [index, node] of missionNodes.entries()) {
+				const x = node.x * width;
+				const y = node.y * height;
+				const glow = reduceMotion
+					? 0.3
+					: 0.42 + Math.sin(time * 0.001 + node.phase) * 0.12;
 
-				for (let j = i + 1; j < resolvedNodes.length; j += 1) {
-					const b = resolvedNodes[j];
+				ctx.strokeStyle = `rgba(255, 210, 122, ${glow})`;
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.arc(x, y, 14 + index * 1.8, 0, Math.PI * 2);
+				ctx.stroke();
+
+				if (width > 780) {
+					ctx.fillStyle = "rgba(216, 255, 247, 0.62)";
+					ctx.font = "700 10px Manrope, sans-serif";
+					ctx.fillText(node.label, x + 18, y + 4);
+				}
+			}
+
+			for (let i = 0; i < resolvedParticles.length; i += 1) {
+				const a = resolvedParticles[i];
+
+				for (let j = i + 1; j < resolvedParticles.length; j += 1) {
+					const b = resolvedParticles[j];
 					const distance = Math.hypot(a.x - b.x, a.y - b.y);
-					const threshold = a.layer === 3 && b.layer === 3 ? 96 : 82;
+					const threshold =
+						a.kind === "beacon" || b.kind === "beacon" ? 116 : 68;
 
-					if (distance < threshold) {
+					if (distance < threshold && (a.active > 0.04 || b.active > 0.04)) {
 						const alpha = Math.min(
-							0.38,
-							0.045 + Math.max(a.active, b.active) * 0.32,
+							0.32,
+							0.04 + Math.max(a.active, b.active) * 0.24,
 						);
-						ctx.strokeStyle =
-							a.layer === 0 || b.layer === 0
-								? `rgba(255, 138, 104, ${alpha})`
-								: `rgba(134, 245, 231, ${alpha})`;
+						ctx.strokeStyle = `rgba(134, 245, 231, ${alpha})`;
 						ctx.lineWidth = 1;
 						ctx.beginPath();
 						ctx.moveTo(a.x, a.y);
@@ -284,23 +356,42 @@ function ParticleTreeBackground() {
 				}
 			}
 
-			for (const node of resolvedNodes) {
+			for (const particle of resolvedParticles) {
+				const isTrail = particle.kind === "trail";
+				const isBeacon = particle.kind === "beacon";
+				const alpha = isBeacon ? 0.86 : isTrail ? 0.58 : 0.45;
+
 				ctx.beginPath();
 				ctx.fillStyle =
-					node.layer === 3
-						? `rgba(216, 255, 247, ${0.6 + node.active * 0.24})`
-						: `rgba(255, 210, 122, ${0.52 + node.active * 0.28})`;
-				ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+					particle.kind === "star"
+						? `rgba(216, 255, 247, ${alpha + particle.active * 0.2})`
+						: `rgba(255, 210, 122, ${alpha + particle.active * 0.22})`;
+				ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
 				ctx.fill();
 
-				if (node.active > 0.28) {
-					ctx.strokeStyle = "rgba(255, 138, 104, 0.48)";
+				if (isBeacon || particle.active > 0.25) {
+					ctx.strokeStyle = `rgba(96, 215, 207, ${0.18 + particle.active * 0.32})`;
 					ctx.lineWidth = 1;
 					ctx.beginPath();
-					ctx.arc(node.x, node.y, node.size + 7, 0, Math.PI * 2);
+					ctx.arc(particle.x, particle.y, particle.size + 7, 0, Math.PI * 2);
 					ctx.stroke();
 				}
 			}
+
+			for (let index = 0; index < 9; index += 1) {
+				const offset = reduceMotion
+					? index * 18
+					: ((time * 0.018 + index * 76) % (width + 160)) - 80;
+				const y = height * (0.18 + index * 0.072);
+				ctx.strokeStyle = "rgba(216, 255, 247, 0.08)";
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(offset, y);
+				ctx.lineTo(offset + 86, y - 34);
+				ctx.stroke();
+			}
+
+			drawShip(shipX, shipY, shipAngle, pulse);
 
 			if (pulse > 0.02) {
 				ctx.strokeStyle = `rgba(255, 210, 122, ${pulse * 0.46})`;
@@ -316,10 +407,18 @@ function ParticleTreeBackground() {
 			}
 		};
 
+		const resizeAndRedraw = () => {
+			resize();
+
+			if (reduceMotion) {
+				draw();
+			}
+		};
+
 		resize();
 		draw();
 
-		const observer = new ResizeObserver(resize);
+		const observer = new ResizeObserver(resizeAndRedraw);
 		observer.observe(wrap);
 
 		const updatePointer = (event: globalThis.PointerEvent) => {
@@ -360,8 +459,8 @@ function ParticleTreeBackground() {
 	}, []);
 
 	return (
-		<div ref={wrapRef} className="vibe-tree-background">
-			<canvas ref={canvasRef} className="vibe-tree-canvas" />
+		<div ref={wrapRef} className="vibe-space-background" aria-hidden="true">
+			<canvas ref={canvasRef} className="vibe-space-canvas" />
 		</div>
 	);
 }
@@ -370,14 +469,14 @@ function App() {
 	return (
 		<main className="overflow-hidden">
 			<section className="vibe-hero">
-				<ParticleTreeBackground />
-				<div className="vibe-tree-signal vibe-tree-signal-left">
-					<span>ROOTED_CONTEXT</span>
+				<SpaceMissionBackground />
+				<div className="vibe-space-signal vibe-space-signal-left">
+					<span>MISSION_CONTEXT</span>
 					<strong>AGENTS.md</strong>
 				</div>
-				<div className="vibe-tree-signal vibe-tree-signal-right">
-					<span>INTERACTIVE_TREE</span>
-					<strong>pointer + pulse</strong>
+				<div className="vibe-space-signal vibe-space-signal-right">
+					<span>AI_REVIEW_ORBIT</span>
+					<strong>Code Reviewer</strong>
 				</div>
 				<div className="page-wrap relative z-10 flex min-h-[72svh] flex-col justify-center px-4 py-16 text-white sm:py-20">
 					<div className="max-w-4xl rise-in">
@@ -389,9 +488,8 @@ function App() {
 							Vibe Coding
 						</h1>
 						<p className="mb-8 max-w-3xl text-lg leading-8 text-white/86 sm:text-xl">
-							把“感觉对了就让 AI
-							写”的随意协作，升级成可复盘、可验证、可交接的团队工程流程。 Codex
-							负责执行，规范负责定边界，团队负责判断和验收。
+							把 AI 协作从灵感点火推进到可验证交付：Codex
+							负责执行航线，规范负责校准轨道，团队负责判断、验收和发射。
 						</p>
 						<div className="flex flex-wrap gap-3">
 							<a href="#workflow" className="vibe-hero-button">
@@ -408,7 +506,7 @@ function App() {
 						{[
 							["6", "任务 Skill"],
 							["1", "SessionStart 入口"],
-							["0", "无验证不完成"],
+							["0", "未验证不发射"],
 						].map(([value, label]) => (
 							<div key={label} className="vibe-stat">
 								<strong>{value}</strong>
