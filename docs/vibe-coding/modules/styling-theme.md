@@ -32,6 +32,7 @@
 - 查询示例专用类：`query-console-shell`、`query-hero-panel`、`query-status-panel`、`query-stat-card`、`query-results-panel`、`query-source-panel`
 - 表格示例专用类：`table-console-shell`、`table-hero-panel`、`table-flow-panel`、`table-stat-card`、`table-form-panel`、`table-data-panel`、`table-pagination-panel`、`table-debug-panel`
 - 变更影响图专用类：`changes-page`、`changes-hero`、`changes-toolbar`、`changes-timeline-panel`、`changes-graph-panel`、`changes-detail-panel`
+- 项目文档专用类：`project-docs-page`、`project-docs-hero`、`project-docs-card`、`project-doc-reader`、`project-markdown-body`
 
 ## 主题变量
 
@@ -92,6 +93,11 @@
 | `changes-timeline-panel` | 变更时间线列表面板 |
 | `changes-graph-panel` | 变更影响关系图容器 |
 | `changes-detail-panel` | 变更详情面板 |
+| `project-docs-page` | 项目文档索引页面根容器 |
+| `project-docs-hero` | 项目文档索引页 AI 科技感首屏 |
+| `project-docs-card` | 项目文档索引页单篇文档入口 |
+| `project-doc-reader` | Markdown 详情页正文容器 |
+| `project-markdown-body` | Markdown 正文排版、表格、代码块和链接样式 |
 
 ## 当前注意事项
 
@@ -121,5 +127,6 @@
 - 表格示例页面使用 CSS 动态网格背景和 `table-*` 类，不依赖远程图片或新增依赖；桌面和移动端都应确认表格可横向滚动、表单不溢出。
 - Docs 页面使用低速 canvas 粒子背景和 `docs-*` 类，不依赖远程图片或新增依赖；应确认粒子、数据包和扫描线不会移动过快。
 - Changes 页面使用 CSS/SVG 关系图和 `changes-*` 类，不依赖远程图片或新增依赖；桌面和移动端都应确认筛选、节点、详情面板不重叠。
+- Project Docs 页面使用 `project-doc-*` 和 `project-markdown-body` 类；桌面和移动端都应确认 Markdown 标题、表格、代码块、长路径和侧边目录不溢出。
 - 在移动端宽度检查 Header、表格、表单是否溢出。
 - 修改 `styles.css` 后运行 `npm run build`。

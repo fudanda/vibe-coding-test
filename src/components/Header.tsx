@@ -38,6 +38,13 @@ export default function Header() {
 						文档
 					</Link>
 					<Link
+						to="/project-docs"
+						className="nav-link"
+						activeProps={{ className: "nav-link is-active" }}
+					>
+						项目文档
+					</Link>
+					<Link
 						to="/changes"
 						className="nav-link"
 						activeProps={{ className: "nav-link is-active" }}

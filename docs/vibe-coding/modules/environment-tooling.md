@@ -62,6 +62,21 @@
 import { demoPeopleSeed } from '#/data/demo-table-data'
 ```
 
+## Markdown 渲染依赖
+
+项目文档模块使用 unified 体系渲染仓库内 Markdown，相关依赖包括：
+
+- `unified`
+- `remark-parse`
+- `remark-gfm`
+- `remark-rehype`
+- `rehype-slug`
+- `rehype-autolink-headings`
+- `rehype-stringify`
+- `html-react-parser`
+
+这些依赖用于 `src/lib/markdown.ts` 和 `src/components/Markdown.tsx`。当前没有引入 `content-collections`，文档索引由 Vite `import.meta.glob(..., { query: "?raw" })` 在构建时收集。
+
 ## 环境变量
 
 `src/env.ts` 使用 `@t3-oss/env-core` 和 Zod 定义：

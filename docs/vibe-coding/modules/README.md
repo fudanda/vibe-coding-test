@@ -23,6 +23,7 @@
 | 路由与页面 | [routing-pages.md](./routing-pages.md) | 文件路由、页面入口、生成路由树、Loader 使用方式 |
 | UI 组件 | [ui-components.md](./ui-components.md) | Header、Footer、ThemeToggle、导航与主题交互 |
 | 样式与主题 | [styling-theme.md](./styling-theme.md) | Tailwind、CSS 变量、深浅色主题、共享视觉类 |
+| 项目文档 | [project-docs.md](./project-docs.md) | Markdown 文档索引、渲染、目录、模块文档和变更记录浏览 |
 | TanStack Query | [tanstack-query.md](./tanstack-query.md) | QueryClient、SSR Query 集成、Query Devtools、查询 demo |
 | TanStack Store | [demo-store.md](./demo-store.md) | 全局 store、派生状态、Store Devtools、表单联动 |
 | TanStack Table | [demo-table.md](./demo-table.md) | SQLite 表格数据、server function、模糊过滤、排序、分页 |

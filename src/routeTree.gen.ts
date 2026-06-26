@@ -9,15 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProjectDocsRouteImport } from './routes/project-docs'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as ChangesRouteImport } from './routes/changes'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectDocsIndexRouteImport } from './routes/project-docs.index'
+import { Route as ProjectDocsDocIdRouteImport } from './routes/project-docs.$docId'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoStoreRouteImport } from './routes/demo/store'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 
+const ProjectDocsRoute = ProjectDocsRouteImport.update({
+  id: '/project-docs',
+  path: '/project-docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -37,6 +45,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectDocsIndexRoute = ProjectDocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProjectDocsRoute,
+} as any)
+const ProjectDocsDocIdRoute = ProjectDocsDocIdRouteImport.update({
+  id: '/$docId',
+  path: '/$docId',
+  getParentRoute: () => ProjectDocsRoute,
 } as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
@@ -64,10 +82,13 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/changes': typeof ChangesRoute
   '/docs': typeof DocsRoute
+  '/project-docs': typeof ProjectDocsRouteWithChildren
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/project-docs/$docId': typeof ProjectDocsDocIdRoute
+  '/project-docs/': typeof ProjectDocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +99,8 @@ export interface FileRoutesByTo {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/project-docs/$docId': typeof ProjectDocsDocIdRoute
+  '/project-docs': typeof ProjectDocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +108,13 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/changes': typeof ChangesRoute
   '/docs': typeof DocsRoute
+  '/project-docs': typeof ProjectDocsRouteWithChildren
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/project-docs/$docId': typeof ProjectDocsDocIdRoute
+  '/project-docs/': typeof ProjectDocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,10 +123,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/changes'
     | '/docs'
+    | '/project-docs'
     | '/demo/drizzle'
     | '/demo/store'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/project-docs/$docId'
+    | '/project-docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,16 +140,21 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/project-docs/$docId'
+    | '/project-docs'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/changes'
     | '/docs'
+    | '/project-docs'
     | '/demo/drizzle'
     | '/demo/store'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/project-docs/$docId'
+    | '/project-docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,6 +162,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ChangesRoute: typeof ChangesRoute
   DocsRoute: typeof DocsRoute
+  ProjectDocsRoute: typeof ProjectDocsRouteWithChildren
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoStoreRoute: typeof DemoStoreRoute
   DemoTableRoute: typeof DemoTableRoute
@@ -136,6 +171,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/project-docs': {
+      id: '/project-docs'
+      path: '/project-docs'
+      fullPath: '/project-docs'
+      preLoaderRoute: typeof ProjectDocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs': {
       id: '/docs'
       path: '/docs'
@@ -163,6 +205,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/project-docs/': {
+      id: '/project-docs/'
+      path: '/'
+      fullPath: '/project-docs/'
+      preLoaderRoute: typeof ProjectDocsIndexRouteImport
+      parentRoute: typeof ProjectDocsRoute
+    }
+    '/project-docs/$docId': {
+      id: '/project-docs/$docId'
+      path: '/$docId'
+      fullPath: '/project-docs/$docId'
+      preLoaderRoute: typeof ProjectDocsDocIdRouteImport
+      parentRoute: typeof ProjectDocsRoute
     }
     '/demo/tanstack-query': {
       id: '/demo/tanstack-query'
@@ -195,11 +251,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProjectDocsRouteChildren {
+  ProjectDocsDocIdRoute: typeof ProjectDocsDocIdRoute
+  ProjectDocsIndexRoute: typeof ProjectDocsIndexRoute
+}
+
+const ProjectDocsRouteChildren: ProjectDocsRouteChildren = {
+  ProjectDocsDocIdRoute: ProjectDocsDocIdRoute,
+  ProjectDocsIndexRoute: ProjectDocsIndexRoute,
+}
+
+const ProjectDocsRouteWithChildren = ProjectDocsRoute._addFileChildren(
+  ProjectDocsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ChangesRoute: ChangesRoute,
   DocsRoute: DocsRoute,
+  ProjectDocsRoute: ProjectDocsRouteWithChildren,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoStoreRoute: DemoStoreRoute,
   DemoTableRoute: DemoTableRoute,

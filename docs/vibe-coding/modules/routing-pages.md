@@ -10,6 +10,9 @@
 - `src/routes/index.tsx`
 - `src/routes/about.tsx`
 - `src/routes/changes.tsx`
+- `src/routes/project-docs.tsx`
+- `src/routes/project-docs.index.tsx`
+- `src/routes/project-docs.$docId.tsx`
 - `src/routes/demo/table.tsx`
 - `src/routes/demo/store.tsx`
 - `src/routes/demo/tanstack-query.tsx`
@@ -27,6 +30,8 @@
 | `/about` | `src/routes/about.tsx` | Vibe Coding 科技感介绍页，包含可交互 canvas 背景、协作链路、核心原则和工作流说明 |
 | `/docs` | `src/routes/docs.tsx` | 本地文档中心，包含 AI 科技感粒子背景、AI Core/HUD、规则入口、流程入口和本地文档清单 |
 | `/changes` | `src/routes/changes.tsx` | 功能变更影响图页面，基于静态 change fragment 数据展示时间线、筛选、关系图和详情面板 |
+| `/project-docs` | `src/routes/project-docs.tsx` + `src/routes/project-docs.index.tsx` | 项目文档父布局和索引页，按类型生成模块文档、变更记录、ADR、Review 和模板入口 |
+| `/project-docs/$docId` | `src/routes/project-docs.$docId.tsx` | 单篇 Markdown 文档详情页，包含渲染正文、页面目录和同类文档 |
 | `/demo/table` | `src/routes/demo/table.tsx` | TanStack Table demo |
 | `/demo/store` | `src/routes/demo/store.tsx` | TanStack Store demo |
 | `/demo/tanstack-query` | `src/routes/demo/tanstack-query.tsx` | TanStack Query + SQLite 查询 demo |
@@ -66,6 +71,7 @@ function SettingsPage() {
 - About 页面是 Vibe Coding 的项目理念介绍页，首屏使用动态 canvas 背景，交互逻辑保留在 `src/routes/about.tsx` 内，样式使用 `about-*` 语义类。
 - Docs 页面是本地文档中心，首屏使用低速可交互粒子背景、AI Core 面板、Agent Trace 控制台和 AI 信号带，交互逻辑保留在 `src/routes/docs.tsx` 内，样式使用 `docs-*` 语义类。
 - Changes 页面是功能变更可视化页面，使用静态 `changeImpactRecords` 数据展示 change fragment 的影响范围、验证证据和 Review 状态；交互逻辑保留在 `src/routes/changes.tsx` 内，数据维护在 `src/lib/change-impact-data.ts`，样式使用 `changes-*` 语义类。
+- Project Docs 页面是项目 Markdown 文档浏览器，`src/routes/project-docs.tsx` 是父布局并渲染 `Outlet`，索引页保留在 `src/routes/project-docs.index.tsx`，详情页保留在 `src/routes/project-docs.$docId.tsx`，数据维护在 `src/lib/project-docs.ts`，Markdown 渲染使用 `src/components/Markdown.tsx` 和 `src/lib/markdown.ts`。
 - 外链必须设置 `target="_blank"` 时，同时添加 `rel="noopener noreferrer"` 或 `rel="noreferrer"`。
 - Demo 页面可以保留英文文案；正式业务页面建议统一中文。
 
@@ -86,6 +92,8 @@ export const Route = createFileRoute('/demo/drizzle')({
 
 `src/routes/changes.tsx` 不直接解析 Markdown 文件。v1 使用 `src/lib/change-impact-data.ts` 中维护的静态 `ChangeImpactRecord` 数据，把现有 change fragment 的日期、作者、类型、影响模块、关键文件、验证证据、Review 状态、风险和 Token 消耗映射到页面。后续如果需要自动生成，可以替换数据来源而不重写页面结构。
 
+`src/routes/project-docs.index.tsx` 和 `src/routes/project-docs.$docId.tsx` 使用 `src/lib/project-docs.ts` 在构建时通过 `import.meta.glob` 收集 `docs/vibe-coding/**/*.md`。详情页 loader 会按 `docId` 查找文档，并使用 `renderMarkdown()` 生成页面目录。
+
 ## 验证清单
 
 - 新增或移动路由后运行 `npm run build`。
@@ -93,3 +101,4 @@ export const Route = createFileRoute('/demo/drizzle')({
 - 在浏览器访问新 URL，确认刷新页面也能正常进入。
 - 如果路由出现在 Header，检查 active 状态是否正确。
 - 如果更新 `/changes` 页面，抽查 2-3 条 change fragment，确认页面展示内容和 Markdown 记录一致。
+- 如果更新 `/project-docs` 页面，检查模块文档、变更记录和单篇 Markdown 详情页都能打开。

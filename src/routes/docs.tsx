@@ -52,6 +52,12 @@ const quickEntries = [
 		path: "/changes",
 		icon: Radar,
 	},
+	{
+		title: "项目文档",
+		desc: "以 Markdown 渲染方式浏览模块文档、变更记录、ADR 和 Review 说明。",
+		path: "/project-docs",
+		icon: FileText,
+	},
 ];
 
 const protocolSteps = [
@@ -69,6 +75,7 @@ const localDocs = [
 	["Codex 运行协作", "docs/vibe-coding/09-codex-operations.md"],
 	["模块文档索引", "docs/vibe-coding/modules/README.md"],
 	["变更影响图", "/changes"],
+	["项目文档", "/project-docs"],
 ];
 
 const aiSignals = [
