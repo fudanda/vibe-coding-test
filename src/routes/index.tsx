@@ -2,62 +2,125 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowRight,
 	Bot,
-	Braces,
 	CheckCircle2,
 	FileCheck2,
 	GitPullRequest,
 	Layers3,
-	ShieldCheck,
 	Sparkles,
 	Workflow,
-	Zap,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({ component: App });
 
-const workflowSteps = [
+const missionSections = [
 	{
-		title: "Intake",
-		desc: "先锁定目标、非目标、影响模块和验收标准，让 AI 不靠猜。",
+		id: "mission-core",
+		nav: "任务核心",
+		label: "Mission Core",
+		shortcut: "M",
+		kicker: "AI 协作任务控制台",
+		title: "Vibe Coding",
+		desc: "把 AI 协作从灵感点火推进到可验证交付：Codex 负责执行航线，规范负责校准轨道，团队负责判断、验收和发射。",
+		status: "AGENTS.md 锁定任务坐标",
+		command: "load AGENTS.md -> route by skill",
 		icon: Sparkles,
+		points: [
+			"团队规则自动进入上下文",
+			"需求、计划、实现、验证分段推进",
+			"没有验证证据不允许发射",
+		],
+		metrics: [
+			["6", "任务 Skill"],
+			["1", "Session 入口"],
+			["0", "未验证发射"],
+		],
 	},
 	{
-		title: "Plan",
-		desc: "把实现范围、测试方案、风险和回滚方式写清楚，再进入编码。",
+		id: "flight-plan",
+		nav: "飞行计划",
+		label: "Flight Plan",
+		shortcut: "P",
+		kicker: "Plan First",
+		title: "先定航线，再让 Codex 加速。",
+		desc: "复杂任务先明确目标、非目标、影响范围、验收方式和风险，避免 AI 一边猜一边改。",
+		status: "Plan mode / Human Loop",
+		command: "/plan complex task -> confirm -> implement",
 		icon: Workflow,
+		points: [
+			"复杂需求优先进入计划模式",
+			"方案确认前不修改代码",
+			"风险、回滚和验证方式写在计划里",
+		],
 	},
 	{
-		title: "Implement",
-		desc: "沿用项目现有模式，小步提交，小 diff，可验证地推进。",
-		icon: Braces,
+		id: "agent-stack",
+		nav: "智能体栈",
+		label: "Agent Stack",
+		shortcut: "A",
+		kicker: "Codex Plugin",
+		title: "从一句话导入，升级到自动加载团队规范。",
+		desc: "通过 Codex 插件、session-start hook 和 skills，把团队协作方式变成每次会话都会自动触达的工作系统。",
+		status: "skills + hooks + AGENTS.md",
+		command: "session-start -> vibe-intake / vibe-plan / vibe-review",
+		icon: Layers3,
+		points: [
+			"AGENTS.md 优先",
+			"按任务类型加载 skill",
+			"模块文档和 change fragment 同步",
+		],
 	},
 	{
-		title: "Verify",
-		desc: "没有验证证据就不能声称完成，结果必须能被 Review 复核。",
+		id: "review-orbit",
+		nav: "审查轨道",
+		label: "Review Orbit",
+		shortcut: "R",
+		kicker: "AI Review Gate",
+		title: "每次有意义的功能修改，都进入独立审查轨道。",
+		desc: "Code Reviewer 负责提前发现风险、测试缺口和可维护性问题；人仍然对最终合并负责。",
+		status: "【AI提交】独立线程",
+		command: "create_thread -> code-reviewer -> submit prep",
+		icon: GitPullRequest,
+		points: [
+			"当前开发对话不直接 commit",
+			"独立线程基于固定 diff 审查",
+			"阻塞问题未解决不提交",
+		],
+	},
+	{
+		id: "verify-gate",
+		nav: "验证闸门",
+		label: "Verify Gate",
+		shortcut: "V",
+		kicker: "No Evidence, No Done",
+		title: "没有验证证据，就不允许说完成。",
+		desc: "构建、测试、浏览器检查、接口响应和风险记录都要能被 Review 复核，完成不是一句口头结论。",
+		status: "build / check / browser evidence",
+		command: "verify -> record evidence -> review",
 		icon: CheckCircle2,
+		points: [
+			"验证命令写入 change fragment",
+			"高风险变更保留人工 Review",
+			"失败结果必须如实记录",
+		],
 	},
-];
-
-const capabilities = [
-	[
-		"自动加载规范",
-		"通过 Codex 插件、session-start hook 和 skills 进入团队工作方式。",
-	],
-	["模块文档同步", "模块文档只写当前事实，变更原因放进独立日志碎片。"],
-	[
-		"多人低冲突记录",
-		"一个变更一份 change fragment，避免所有人抢同一个 CHANGELOG。",
-	],
-	["AI Review 门禁", "评审重点看真实行为、风险、测试证据和 AI 生成内容边界。"],
-];
-
-const guardrails = [
-	"需求、非目标和验收标准先确认",
-	"影响模块必须同步模块文档",
-	"重要取舍新增 ADR 决策记录",
-	"PR 必须提供验证证据",
-	"AI 参与范围必须写清楚",
+	{
+		id: "launch-protocol",
+		nav: "发射协议",
+		label: "Launch Protocol",
+		shortcut: "L",
+		kicker: "Commit & PR",
+		title: "提交前，让记录、文档和 PR 草案一起就位。",
+		desc: "模块文档描述当前事实，change fragment 解释为什么改，PR 描述说明验证证据和剩余风险。",
+		status: "Lore commit + PR draft",
+		command: "explicit git add paths -> local commit only",
+		icon: FileCheck2,
+		points: [
+			"一个有意义任务一份 change fragment",
+			"模块事实变化必须同步模块文档",
+			"默认不 push、不创建远端 PR",
+		],
+	},
 ];
 
 type SpaceParticle = {
@@ -71,10 +134,21 @@ type SpaceParticle = {
 };
 
 const missionNodes = [
-	{ label: "INTAKE", x: 0.22, y: 0.66, phase: 0.2 },
-	{ label: "PLAN", x: 0.38, y: 0.38, phase: 1.1 },
-	{ label: "REVIEW", x: 0.68, y: 0.33, phase: 2.4 },
-	{ label: "VERIFY", x: 0.78, y: 0.62, phase: 3.2 },
+	{ label: "CORE", x: 0.18, y: 0.66, phase: 0.2 },
+	{ label: "PLAN", x: 0.32, y: 0.38, phase: 1.1 },
+	{ label: "STACK", x: 0.5, y: 0.5, phase: 1.7 },
+	{ label: "REVIEW", x: 0.66, y: 0.32, phase: 2.4 },
+	{ label: "VERIFY", x: 0.8, y: 0.58, phase: 3.2 },
+	{ label: "LAUNCH", x: 0.88, y: 0.28, phase: 4.1 },
+];
+
+const missionPalettes = [
+	{ primary: "134, 245, 231", accent: "255, 210, 122" },
+	{ primary: "126, 214, 255", accent: "255, 210, 122" },
+	{ primary: "159, 245, 191", accent: "96, 215, 207" },
+	{ primary: "255, 138, 104", accent: "255, 210, 122" },
+	{ primary: "96, 215, 207", accent: "216, 255, 247" },
+	{ primary: "255, 210, 122", accent: "255, 138, 104" },
 ];
 
 function createSpaceParticles() {
@@ -125,11 +199,27 @@ function createSpaceParticles() {
 	return particles;
 }
 
-function SpaceMissionBackground() {
+function SpaceMissionBackground({
+	activeSectionIndex,
+}: {
+	activeSectionIndex: number;
+}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapRef = useRef<HTMLDivElement>(null);
 	const pointerRef = useRef({ active: false, x: 0, y: 0 });
 	const pulseRef = useRef(0);
+	const activeRef = useRef(activeSectionIndex);
+	const reduceMotionRef = useRef(false);
+	const redrawRef = useRef<(() => void) | null>(null);
+
+	useEffect(() => {
+		activeRef.current = activeSectionIndex;
+		pulseRef.current = Math.max(pulseRef.current, 0.42);
+
+		if (reduceMotionRef.current) {
+			redrawRef.current?.();
+		}
+	}, [activeSectionIndex]);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -149,6 +239,7 @@ function SpaceMissionBackground() {
 		const reduceMotion = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
 		).matches;
+		reduceMotionRef.current = reduceMotion;
 
 		let frameId = 0;
 		let width = 0;
@@ -173,11 +264,12 @@ function SpaceMissionBackground() {
 			radiusY: number,
 			rotation: number,
 			alpha: number,
+			color: string,
 		) => {
 			ctx.save();
 			ctx.translate(centerX, centerY);
 			ctx.rotate(rotation);
-			ctx.strokeStyle = `rgba(134, 245, 231, ${alpha})`;
+			ctx.strokeStyle = `rgba(${color}, ${alpha})`;
 			ctx.lineWidth = 1;
 			ctx.setLineDash([7, 18]);
 			ctx.lineCap = "round";
@@ -243,14 +335,23 @@ function SpaceMissionBackground() {
 
 			const pointer = pointerRef.current;
 			const pulse = pulseRef.current;
+			const activeIndex = Math.min(
+				Math.max(activeRef.current, 0),
+				missionNodes.length - 1,
+			);
+			const activeNode = missionNodes[activeIndex];
+			const palette = missionPalettes[activeIndex] ?? missionPalettes[0];
+			const progress = activeIndex / Math.max(missionNodes.length - 1, 1);
 			const focusX = pointer.active
 				? pointer.x
-				: width * (0.62 + Math.sin(time * 0.00016) * 0.08);
+				: width * (activeNode.x + Math.sin(time * 0.00016) * 0.04);
 			const focusY = pointer.active
 				? pointer.y
-				: height * (0.44 + Math.cos(time * 0.00018) * 0.1);
-			const shipX = width * 0.55 + (focusX - width * 0.5) * 0.05;
-			const shipY = height * 0.48 + (focusY - height * 0.5) * 0.04;
+				: height * (activeNode.y + Math.cos(time * 0.00018) * 0.035);
+			const shipX =
+				width * (0.2 + progress * 0.6) + (focusX - width * 0.5) * 0.05;
+			const shipY =
+				height * (0.66 - progress * 0.36) + (focusY - height * 0.5) * 0.04;
 			const shipAngle = Math.atan2(focusY - shipY, focusX - shipX);
 
 			const halo = ctx.createRadialGradient(
@@ -261,15 +362,31 @@ function SpaceMissionBackground() {
 				focusY,
 				Math.max(width, height) * (0.28 + pulse * 0.18),
 			);
-			halo.addColorStop(0, `rgba(255, 210, 122, ${0.18 + pulse * 0.2})`);
-			halo.addColorStop(0.36, "rgba(96, 215, 207, 0.12)");
-			halo.addColorStop(1, "rgba(96, 215, 207, 0)");
+			halo.addColorStop(0, `rgba(${palette.accent}, ${0.18 + pulse * 0.2})`);
+			halo.addColorStop(0.36, `rgba(${palette.primary}, 0.12)`);
+			halo.addColorStop(1, `rgba(${palette.primary}, 0)`);
 			ctx.fillStyle = halo;
 			ctx.fillRect(0, 0, width, height);
 
 			const lanePulse = reduceMotion ? 0 : Math.sin(time * 0.0008) * 0.08;
-			drawOrbitLane(shipX, shipY, width * 0.28, height * 0.16, -0.38, 0.16);
-			drawOrbitLane(shipX, shipY, width * 0.39, height * 0.23, 0.22, 0.1);
+			drawOrbitLane(
+				shipX,
+				shipY,
+				width * 0.28,
+				height * 0.16,
+				-0.38,
+				0.16 + activeIndex * 0.015,
+				palette.primary,
+			);
+			drawOrbitLane(
+				shipX,
+				shipY,
+				width * 0.39,
+				height * 0.23,
+				0.22,
+				0.1,
+				palette.primary,
+			);
 			drawOrbitLane(
 				shipX,
 				shipY,
@@ -277,6 +394,7 @@ function SpaceMissionBackground() {
 				height * 0.1,
 				0.72,
 				0.22 + lanePulse,
+				palette.accent,
 			);
 
 			const visibleParticles =
@@ -312,21 +430,50 @@ function SpaceMissionBackground() {
 				};
 			});
 
+			for (let index = 0; index < missionNodes.length - 1; index += 1) {
+				const from = missionNodes[index];
+				const to = missionNodes[index + 1];
+				const isTraveled = index < activeIndex;
+
+				ctx.strokeStyle = isTraveled
+					? `rgba(${palette.primary}, 0.34)`
+					: "rgba(216, 255, 247, 0.08)";
+				ctx.lineWidth = isTraveled ? 1.6 : 1;
+				ctx.setLineDash(isTraveled ? [] : [6, 16]);
+				ctx.beginPath();
+				ctx.moveTo(from.x * width, from.y * height);
+				ctx.quadraticCurveTo(
+					((from.x + to.x) / 2) * width,
+					(Math.min(from.y, to.y) - 0.1) * height,
+					to.x * width,
+					to.y * height,
+				);
+				ctx.stroke();
+				ctx.setLineDash([]);
+			}
+
 			for (const [index, node] of missionNodes.entries()) {
 				const x = node.x * width;
 				const y = node.y * height;
+				const isActive = index === activeIndex;
+				const isVisited = index < activeIndex;
 				const glow = reduceMotion
-					? 0.3
-					: 0.42 + Math.sin(time * 0.001 + node.phase) * 0.12;
+					? isActive
+						? 0.68
+						: 0.28
+					: (isActive ? 0.76 : isVisited ? 0.44 : 0.2) +
+						Math.sin(time * 0.001 + node.phase) * (isActive ? 0.12 : 0.04);
 
-				ctx.strokeStyle = `rgba(255, 210, 122, ${glow})`;
-				ctx.lineWidth = 1;
+				ctx.strokeStyle = `rgba(${isActive ? palette.accent : palette.primary}, ${glow})`;
+				ctx.lineWidth = isActive ? 2 : 1;
 				ctx.beginPath();
-				ctx.arc(x, y, 14 + index * 1.8, 0, Math.PI * 2);
+				ctx.arc(x, y, (isActive ? 20 : 14) + index * 1.1, 0, Math.PI * 2);
 				ctx.stroke();
 
 				if (width > 780) {
-					ctx.fillStyle = "rgba(216, 255, 247, 0.62)";
+					ctx.fillStyle = isActive
+						? `rgba(${palette.accent}, 0.84)`
+						: "rgba(216, 255, 247, 0.56)";
 					ctx.font = "700 10px Manrope, sans-serif";
 					ctx.fillText(node.label, x + 18, y + 4);
 				}
@@ -346,7 +493,7 @@ function SpaceMissionBackground() {
 							0.32,
 							0.04 + Math.max(a.active, b.active) * 0.24,
 						);
-						ctx.strokeStyle = `rgba(134, 245, 231, ${alpha})`;
+						ctx.strokeStyle = `rgba(${palette.primary}, ${alpha})`;
 						ctx.lineWidth = 1;
 						ctx.beginPath();
 						ctx.moveTo(a.x, a.y);
@@ -365,12 +512,12 @@ function SpaceMissionBackground() {
 				ctx.fillStyle =
 					particle.kind === "star"
 						? `rgba(216, 255, 247, ${alpha + particle.active * 0.2})`
-						: `rgba(255, 210, 122, ${alpha + particle.active * 0.22})`;
+						: `rgba(${palette.accent}, ${alpha + particle.active * 0.22})`;
 				ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
 				ctx.fill();
 
 				if (isBeacon || particle.active > 0.25) {
-					ctx.strokeStyle = `rgba(96, 215, 207, ${0.18 + particle.active * 0.32})`;
+					ctx.strokeStyle = `rgba(${palette.primary}, ${0.18 + particle.active * 0.32})`;
 					ctx.lineWidth = 1;
 					ctx.beginPath();
 					ctx.arc(particle.x, particle.y, particle.size + 7, 0, Math.PI * 2);
@@ -383,7 +530,7 @@ function SpaceMissionBackground() {
 					? index * 18
 					: ((time * 0.018 + index * 76) % (width + 160)) - 80;
 				const y = height * (0.18 + index * 0.072);
-				ctx.strokeStyle = "rgba(216, 255, 247, 0.08)";
+				ctx.strokeStyle = `rgba(${palette.primary}, 0.08)`;
 				ctx.lineWidth = 1;
 				ctx.beginPath();
 				ctx.moveTo(offset, y);
@@ -394,7 +541,7 @@ function SpaceMissionBackground() {
 			drawShip(shipX, shipY, shipAngle, pulse);
 
 			if (pulse > 0.02) {
-				ctx.strokeStyle = `rgba(255, 210, 122, ${pulse * 0.46})`;
+				ctx.strokeStyle = `rgba(${palette.accent}, ${pulse * 0.46})`;
 				ctx.lineWidth = 2;
 				ctx.beginPath();
 				ctx.arc(focusX, focusY, 80 + pulse * 180, 0, Math.PI * 2);
@@ -417,6 +564,7 @@ function SpaceMissionBackground() {
 
 		resize();
 		draw();
+		redrawRef.current = () => draw();
 
 		const observer = new ResizeObserver(resizeAndRedraw);
 		observer.observe(wrap);
@@ -450,6 +598,7 @@ function SpaceMissionBackground() {
 		window.addEventListener("pointerdown", triggerPulse);
 
 		return () => {
+			redrawRef.current = null;
 			observer.disconnect();
 			window.removeEventListener("pointermove", updatePointer);
 			window.removeEventListener("pointerleave", resetPointer);
@@ -466,184 +615,213 @@ function SpaceMissionBackground() {
 }
 
 function App() {
+	const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+	const sectionRefs = useRef<Array<HTMLElement | null>>([]);
+
+	useEffect(() => {
+		const updateActiveSection = () => {
+			const viewportAnchor = window.innerHeight * 0.42;
+			let nextIndex = 0;
+			let bestDistance = Number.POSITIVE_INFINITY;
+
+			for (const [index, section] of sectionRefs.current.entries()) {
+				if (!section) {
+					continue;
+				}
+
+				const rect = section.getBoundingClientRect();
+				const distance = Math.abs(
+					rect.top + rect.height * 0.28 - viewportAnchor,
+				);
+
+				if (distance < bestDistance) {
+					bestDistance = distance;
+					nextIndex = index;
+				}
+			}
+
+			setActiveSectionIndex(nextIndex);
+		};
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visibleEntry = entries
+					.filter((entry) => entry.isIntersecting)
+					.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+				if (!visibleEntry) {
+					return;
+				}
+
+				const index = Number(
+					(visibleEntry.target as HTMLElement).dataset.missionIndex ?? 0,
+				);
+				setActiveSectionIndex(index);
+			},
+			{
+				rootMargin: "-36% 0px -44% 0px",
+				threshold: [0.12, 0.35, 0.62],
+			},
+		);
+
+		for (const section of sectionRefs.current) {
+			if (section) {
+				observer.observe(section);
+			}
+		}
+
+		updateActiveSection();
+		window.addEventListener("scroll", updateActiveSection, { passive: true });
+		window.addEventListener("resize", updateActiveSection);
+
+		return () => {
+			observer.disconnect();
+			window.removeEventListener("scroll", updateActiveSection);
+			window.removeEventListener("resize", updateActiveSection);
+		};
+	}, []);
+
 	return (
-		<main className="overflow-hidden">
-			<section className="vibe-hero">
-				<SpaceMissionBackground />
-				<div className="vibe-space-signal vibe-space-signal-left">
-					<span>MISSION_CONTEXT</span>
-					<strong>AGENTS.md</strong>
-				</div>
-				<div className="vibe-space-signal vibe-space-signal-right">
-					<span>AI_REVIEW_ORBIT</span>
-					<strong>Code Reviewer</strong>
-				</div>
-				<div className="page-wrap relative z-10 flex min-h-[72svh] flex-col justify-center px-4 py-16 text-white sm:py-20">
-					<div className="max-w-4xl rise-in">
-						<p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/24 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_48px_rgba(0,0,0,0.22)] backdrop-blur-md">
-							<Bot size={18} aria-hidden="true" />
-							Codex 驱动的团队 AI 协作开发规范
-						</p>
-						<h1 className="display-title mb-6 max-w-4xl text-5xl font-bold leading-[1.05] text-white sm:text-7xl">
-							Vibe Coding
-						</h1>
-						<p className="mb-8 max-w-3xl text-lg leading-8 text-white/86 sm:text-xl">
-							把 AI 协作从灵感点火推进到可验证交付：Codex
-							负责执行航线，规范负责校准轨道，团队负责判断、验收和发射。
-						</p>
-						<div className="flex flex-wrap gap-3">
-							<a href="#workflow" className="vibe-hero-button">
-								开始使用
-								<ArrowRight size={18} aria-hidden="true" />
+		<main className="vibe-stage">
+			<SpaceMissionBackground activeSectionIndex={activeSectionIndex} />
+			<nav className="vibe-mission-nav" aria-label="首页任务章节">
+				<p>MISSION ROUTE</p>
+				<ol>
+					{missionSections.map((section, index) => (
+						<li key={section.id}>
+							<a
+								href={`#${section.id}`}
+								className="vibe-mission-nav-link"
+								aria-current={index === activeSectionIndex ? "step" : undefined}
+								onClick={() => setActiveSectionIndex(index)}
+							>
+								<span>[{section.shortcut}]</span>
+								<strong>{section.nav}</strong>
+								<em>{section.label}</em>
 							</a>
-							<a href="#guardrails" className="vibe-hero-button-secondary">
-								查看验证门禁
-							</a>
-						</div>
-					</div>
+						</li>
+					))}
+				</ol>
+			</nav>
 
-					<div className="mt-12 grid max-w-4xl gap-3 sm:grid-cols-3">
-						{[
-							["6", "任务 Skill"],
-							["1", "SessionStart 入口"],
-							["0", "未验证不发射"],
-						].map(([value, label]) => (
-							<div key={label} className="vibe-stat">
-								<strong>{value}</strong>
-								<span>{label}</span>
-							</div>
+			<div className="vibe-stage-content">
+				<div className="page-wrap px-4">
+					<nav className="vibe-command-strip" aria-label="任务快捷提示">
+						<span>SCROLL OR PRESS</span>
+						{missionSections.map((section, index) => (
+							<a
+								key={section.id}
+								href={`#${section.id}`}
+								aria-current={index === activeSectionIndex ? "step" : undefined}
+								onClick={() => setActiveSectionIndex(index)}
+							>
+								[{section.shortcut}] {section.nav}
+							</a>
 						))}
-					</div>
-				</div>
-			</section>
-
-			<section id="workflow" className="page-wrap px-4 py-12 sm:py-16">
-				<div className="mb-8 max-w-3xl">
-					<p className="island-kicker mb-3">Team Operating System</p>
-					<h2 className="display-title mb-4 text-4xl font-bold leading-tight text-[var(--sea-ink)] sm:text-5xl">
-						让每一次 AI 协作都有阶段、有证据、有记录。
-					</h2>
-					<p className="m-0 text-base leading-8 text-[var(--sea-ink-soft)]">
-						Vibe Coding 不是让 AI
-						更会表演，而是让团队更容易判断：该做什么、做到了没有、哪里有风险、下次如何接手。
-					</p>
+					</nav>
 				</div>
 
-				<div className="grid gap-4 md:grid-cols-4">
-					{workflowSteps.map(({ title, desc, icon: Icon }, index) => (
-						<article
-							key={title}
-							className="vibe-step-card rise-in"
-							style={{ animationDelay: `${index * 70}ms` }}
+				{missionSections.map((section, index) => {
+					const Icon = section.icon;
+					const isHero = index === 0;
+
+					return (
+						<section
+							key={section.id}
+							id={section.id}
+							ref={(node) => {
+								sectionRefs.current[index] = node;
+							}}
+							data-mission-index={index}
+							data-active={index === activeSectionIndex ? "true" : "false"}
+							className={`vibe-stage-section${isHero ? " vibe-stage-hero" : ""}${
+								index % 2 === 1 ? " vibe-stage-section-alt" : ""
+							}`}
 						>
-							<div className="vibe-icon-badge">
-								<Icon size={22} aria-hidden="true" />
+							<div className="page-wrap vibe-stage-grid px-4">
+								<div className="vibe-stage-panel rise-in">
+									<p className="vibe-stage-eyebrow">
+										<span>[{section.shortcut}]</span>
+										{section.kicker}
+									</p>
+									{isHero ? (
+										<>
+											<p className="vibe-stage-supertitle">
+												<Bot size={18} aria-hidden="true" />
+												AI 协作任务控制台
+											</p>
+											<h1 className="display-title vibe-stage-title">
+												{section.title}
+											</h1>
+										</>
+									) : (
+										<h2 className="display-title vibe-stage-title">
+											{section.title}
+										</h2>
+									)}
+									<p className="vibe-stage-copy">{section.desc}</p>
+									<div className="vibe-stage-actions">
+										{isHero ? (
+											<>
+												<a href="#flight-plan" className="vibe-hero-button">
+													开始使用
+													<ArrowRight size={18} aria-hidden="true" />
+												</a>
+												<a
+													href="#verify-gate"
+													className="vibe-hero-button-secondary"
+												>
+													查看验证门禁
+												</a>
+											</>
+										) : (
+											<span className="vibe-stage-status">
+												{section.status}
+											</span>
+										)}
+									</div>
+								</div>
+
+								<div className="vibe-stage-orbit-panel">
+									<div className="vibe-stage-orbit-head">
+										<div className="vibe-stage-icon">
+											<Icon size={24} aria-hidden="true" />
+										</div>
+										<div>
+											<p>{section.label}</p>
+											<strong>{section.status}</strong>
+										</div>
+									</div>
+
+									<pre className="vibe-stage-command">
+										<code>{`$ ${section.command}`}</code>
+									</pre>
+
+									{section.metrics ? (
+										<div className="vibe-stage-metrics">
+											{section.metrics.map(([value, label]) => (
+												<div key={label} className="vibe-stat">
+													<strong>{value}</strong>
+													<span>{label}</span>
+												</div>
+											))}
+										</div>
+									) : null}
+
+									<ul className="vibe-stage-checklist">
+										{section.points.map((point) => (
+											<li key={point}>
+												<CheckCircle2 size={17} aria-hidden="true" />
+												<span>{point}</span>
+											</li>
+										))}
+									</ul>
+								</div>
 							</div>
-							<p className="mb-2 text-sm font-bold text-[var(--lagoon-deep)]">
-								0{index + 1}
-							</p>
-							<h3 className="mb-3 text-xl font-bold text-[var(--sea-ink)]">
-								{title}
-							</h3>
-							<p className="m-0 text-sm leading-7 text-[var(--sea-ink-soft)]">
-								{desc}
-							</p>
-						</article>
-					))}
-				</div>
-			</section>
-
-			<section className="vibe-band">
-				<div className="page-wrap grid gap-8 px-4 py-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-					<div>
-						<p className="island-kicker mb-3">Codex Plugin</p>
-						<h2 className="display-title mb-4 text-4xl font-bold leading-tight text-[var(--sea-ink)] sm:text-5xl">
-							从一句话导入，进化到自动加载团队规范。
-						</h2>
-						<p className="mb-6 text-base leading-8 text-[var(--sea-ink-soft)]">
-							插件化后的 Vibe Coding 会在 Codex
-							会话开始时给出入口提示，并按任务类型加载
-							intake、plan、implement、review、verify、incident 等 skill。
-						</p>
-						<div className="flex flex-wrap gap-3">
-							<span className="vibe-pill">
-								<Layers3 size={16} aria-hidden="true" />
-								AGENTS.md 优先
-							</span>
-							<span className="vibe-pill">
-								<Zap size={16} aria-hidden="true" />
-								自动阶段化
-							</span>
-							<span className="vibe-pill">
-								<FileCheck2 size={16} aria-hidden="true" />
-								文档同步
-							</span>
-						</div>
-					</div>
-
-					<div className="vibe-terminal">
-						<div className="mb-5 flex items-center gap-2">
-							<span />
-							<span />
-							<span />
-						</div>
-						<pre>
-							<code>{`$ codex session-start
-load: AGENTS.md
-load: skills/vibe-intake
-load: skills/vibe-plan
-
-task: build feature
-rule: no evidence, no done
-docs: modules + changes + ADR`}</code>
-						</pre>
-					</div>
-				</div>
-			</section>
-
-			<section className="page-wrap px-4 py-12 sm:py-16">
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					{capabilities.map(([title, desc]) => (
-						<article key={title} className="vibe-capability-card">
-							<ShieldCheck
-								className="mb-4 text-[var(--coral)]"
-								size={26}
-								aria-hidden="true"
-							/>
-							<h3 className="mb-2 text-lg font-bold text-[var(--sea-ink)]">
-								{title}
-							</h3>
-							<p className="m-0 text-sm leading-7 text-[var(--sea-ink-soft)]">
-								{desc}
-							</p>
-						</article>
-					))}
-				</div>
-			</section>
-
-			<section id="guardrails" className="page-wrap px-4 pb-16">
-				<div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-					<div className="vibe-review-panel">
-						<p className="island-kicker mb-3">Review Gate</p>
-						<h2 className="display-title mb-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-							AI 可以写得快，但完成必须慢半拍验证。
-						</h2>
-						<p className="m-0 text-base leading-8 text-white/78">
-							每个 PR 都要回答：AI
-							做了什么、人工确认了什么、哪些文档同步了、验证证据在哪里。
-						</p>
-					</div>
-
-					<div className="grid gap-3">
-						{guardrails.map((item) => (
-							<div key={item} className="vibe-check-row">
-								<GitPullRequest size={19} aria-hidden="true" />
-								<span>{item}</span>
-							</div>
-						))}
-					</div>
-				</div>
-			</section>
+						</section>
+					);
+				})}
+			</div>
 		</main>
 	);
 }

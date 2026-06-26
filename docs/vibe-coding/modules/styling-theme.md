@@ -26,7 +26,7 @@
 - Tailwind inline theme 映射：`@theme inline`
 - 全局 body 背景、文本、链接、code、pre 样式
 - 共享类：`page-wrap`、`display-title`、`island-shell`、`feature-card`、`nav-link`、`rise-in`
-- 首页专用类：`vibe-hero`、`vibe-space-background`、`vibe-space-signal`、`vibe-step-card`、`vibe-terminal`、`vibe-review-panel`、`vibe-check-row`
+- 首页专用类：`vibe-stage`、`vibe-stage-section`、`vibe-stage-panel`、`vibe-stage-orbit-panel`、`vibe-mission-nav`、`vibe-command-strip`、`vibe-space-background`、`vibe-space-signal`、`vibe-hero-button`
 - About 页面专用类：`about-tech-scene`、`about-tech-background`、`about-signal-panel`、`about-principle-card`、`about-timeline`、`about-command-panel`
 - 数据库示例专用类：`db-console-shell`、`db-hero-panel`、`db-flow-panel`、`db-stat-card`、`db-mutation-panel`、`db-records-panel`
 - 查询示例专用类：`query-console-shell`、`query-hero-panel`、`query-status-panel`、`query-stat-card`、`query-results-panel`、`query-source-panel`
@@ -54,8 +54,13 @@
 | `feature-card` | 首页特性卡片 |
 | `nav-link` | Header 导航链接和 active 下划线 |
 | `rise-in` | 入场动画 |
-| `vibe-hero` | Vibe Coding 首页首屏太空飞船粒子场容器 |
-| `vibe-space-background` | 首页 canvas 太空星场、轨道和飞船背景挂载层 |
+| `vibe-stage` | Vibe Coding 首页 Remix 风格太空任务控制舞台根容器 |
+| `vibe-stage-section` | 首页 Mission Core / Flight Plan 等滚动任务章节 |
+| `vibe-stage-panel` | 首页章节主文案 HUD 面板 |
+| `vibe-stage-orbit-panel` | 首页章节状态、命令和检查项 HUD 面板 |
+| `vibe-mission-nav` | 首页桌面端左侧任务章节导航 |
+| `vibe-command-strip` | 首页移动端和顶部键盘提示式任务导航 |
+| `vibe-space-background` | 首页固定 canvas 太空星场、轨道和飞船背景挂载层 |
 | `vibe-space-signal` | 首页太空任务信号标签 |
 | `vibe-step-card` | Vibe Coding 流程阶段卡片 |
 | `vibe-terminal` | Codex 插件流程终端展示 |
@@ -122,7 +127,7 @@
 
 - 浅色、深色、auto 三种主题都检查一遍。
 - 检查首页、About、四个 demo 页面。
-- 首页首屏使用本地 canvas 绘制太空飞船粒子场，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠，鼠标移动和点击有克制的轨道/脉冲反馈。
+- 首页使用本地 canvas 绘制贯穿首屏和后续章节的太空任务舞台，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠，左侧任务导航或移动端命令条可用，滚动时当前章节、飞船航线和任务节点高亮会更新，鼠标移动和点击有克制的轨道/脉冲反馈。
 - About 首屏使用本地 canvas 绘制动态网络背景，不依赖远程图片或新增依赖；验证时应确认桌面和移动端截图非空、文字不重叠。
 - 数据库示例页面使用 CSS 动态网格背景和 `db-*` 类，不依赖远程图片或新增依赖；桌面和移动端都应确认写入表单、schema 和记录列表不溢出。
 - 查询示例页面使用 CSS 动态网格背景和 `query-*` 类，不依赖远程图片或新增依赖。
