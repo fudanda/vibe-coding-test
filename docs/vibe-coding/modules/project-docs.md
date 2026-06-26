@@ -53,6 +53,7 @@
 - `javascript:`、`data:`、`vbscript:`、协议相对 URL 和包含控制字符的 URL 会被移除
 - 图片使用 `loading="lazy"`
 - 相对 `.md` 链接通过 `resolveProjectDocHref()` 转换为 `/project-docs/$docId`
+- 被替换渲染的 `<a>` 和 `<img>` 会先通过 `attributesToProps()` 把 HTML 属性转换为 React props，避免 `class`、`srcset` 等 HTML 属性直接传入 React 后产生控制台告警
 
 页面目录的 heading id 从渲染后的 HTML 标题节点读取，避免手写 slug 规则和 `rehype-slug` 生成的正文锚点不一致。
 

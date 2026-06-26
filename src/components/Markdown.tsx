@@ -1,4 +1,5 @@
 import parse, {
+	attributesToProps,
 	domToReact,
 	Element,
 	type HTMLReactParserOptions,
@@ -95,10 +96,11 @@ export function Markdown({ content, className, resolveHref }: MarkdownProps) {
 				const isExternal =
 					typeof href === "string" && /^https?:\/\//.test(href);
 				const { href: _rawHref, ...safeAttribs } = domNode.attribs;
+				const props = attributesToProps(safeAttribs, domNode.name);
 
 				return (
 					<a
-						{...safeAttribs}
+						{...props}
 						href={href}
 						rel={isExternal ? "noreferrer" : domNode.attribs.rel}
 						target={isExternal ? "_blank" : domNode.attribs.target}
@@ -111,10 +113,11 @@ export function Markdown({ content, className, resolveHref }: MarkdownProps) {
 			if (domNode.name === "img") {
 				const src = sanitizeMarkdownUrl(domNode.attribs.src, "image");
 				const { src: _rawSrc, ...safeAttribs } = domNode.attribs;
+				const props = attributesToProps(safeAttribs, domNode.name);
 
 				return (
 					<img
-						{...safeAttribs}
+						{...props}
 						alt={domNode.attribs.alt ?? ""}
 						loading="lazy"
 						src={src}

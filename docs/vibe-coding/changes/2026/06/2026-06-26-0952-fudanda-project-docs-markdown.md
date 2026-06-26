@@ -22,6 +22,7 @@
 - 新增 `src/lib/project-docs.ts`，使用 Vite `import.meta.glob` 收集 `docs/vibe-coding/**/*.md`。
 - 新增 `src/lib/markdown.ts` 和 `src/components/Markdown.tsx`，使用 unified 体系渲染 Markdown。
 - Markdown 链接和图片 URL 增加协议白名单，过滤 `javascript:`、`data:`、`vbscript:` 和协议相对 URL；外链继续自动加 `target="_blank"` 和 `rel="noreferrer"`。
+- 修复 Markdown 标题锚点 `<a class="markdown-anchor">` 被替换渲染时把 HTML `class` 原样传给 React 的问题，改为通过 `attributesToProps()` 转换为 `className` 等 React props。
 - 页面目录改为从 `rehype-slug` 渲染后的标题 `id` 回读，避免自定义 slug 和正文锚点不一致。
 - 新增 Markdown 渲染和 URL 安全边界测试。
 - Header 和 `/docs` 页面新增“项目文档”入口。
@@ -52,6 +53,7 @@
 - 已执行：浏览器访问 `http://127.0.0.1:4174/project-docs`，确认导航 active 为“项目文档”、卡片数量 62、包含模块文档和变更记录、无横向溢出、无控制台错误。
 - 已执行：浏览器访问 `http://127.0.0.1:4174/project-docs/modules-project-docs`，确认 Markdown H1、8 个二级标题、1 个表格、9 个目录链接、6 个同类文档链接正常渲染，无控制台错误。
 - 已执行：浏览器 390px 移动端视口检查详情页，确认正文和 reader 无横向溢出。
+- 已执行：修复 React `Invalid DOM property class` 后，基于 `http://127.0.0.1:4175/project-docs/modules-project-docs` 重新做浏览器控制台验证，`Invalid DOM property class` 日志数量为 0，标题锚点仍保留 `markdown-anchor` class。
 
 ## 风险和后续事项
 
