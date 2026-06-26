@@ -37,6 +37,13 @@ export default function Header() {
 					>
 						文档
 					</Link>
+					<Link
+						to="/changes"
+						className="nav-link"
+						activeProps={{ className: "nav-link is-active" }}
+					>
+						变更图
+					</Link>
 					<details className="relative w-full sm:w-auto">
 						<summary className="nav-link list-none cursor-pointer">
 							示例

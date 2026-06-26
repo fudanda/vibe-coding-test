@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as ChangesRouteImport } from './routes/changes'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
@@ -20,6 +21,11 @@ import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangesRoute = ChangesRouteImport.update({
+  id: '/changes',
+  path: '/changes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -56,6 +62,7 @@ const DemoDrizzleRoute = DemoDrizzleRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/changes': typeof ChangesRoute
   '/docs': typeof DocsRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/store': typeof DemoStoreRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/changes': typeof ChangesRoute
   '/docs': typeof DocsRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/store': typeof DemoStoreRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/changes': typeof ChangesRoute
   '/docs': typeof DocsRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/store': typeof DemoStoreRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/changes'
     | '/docs'
     | '/demo/drizzle'
     | '/demo/store'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/changes'
     | '/docs'
     | '/demo/drizzle'
     | '/demo/store'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/changes'
     | '/docs'
     | '/demo/drizzle'
     | '/demo/store'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ChangesRoute: typeof ChangesRoute
   DocsRoute: typeof DocsRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoStoreRoute: typeof DemoStoreRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changes': {
+      id: '/changes'
+      path: '/changes'
+      fullPath: '/changes'
+      preLoaderRoute: typeof ChangesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ChangesRoute: ChangesRoute,
   DocsRoute: DocsRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoStoreRoute: DemoStoreRoute,

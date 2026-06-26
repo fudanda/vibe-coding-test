@@ -46,6 +46,12 @@ const quickEntries = [
 		path: "docs/vibe-coding/07-commit-pr.md",
 		icon: GitPullRequest,
 	},
+	{
+		title: "变更影响图",
+		desc: "把功能变更、影响模块、验证证据和 Review 状态放到一张可交互地图。",
+		path: "/changes",
+		icon: Radar,
+	},
 ];
 
 const protocolSteps = [
@@ -62,6 +68,7 @@ const localDocs = [
 	["安全边界", "docs/vibe-coding/06-security.md"],
 	["Codex 运行协作", "docs/vibe-coding/09-codex-operations.md"],
 	["模块文档索引", "docs/vibe-coding/modules/README.md"],
+	["变更影响图", "/changes"],
 ];
 
 const aiSignals = [
